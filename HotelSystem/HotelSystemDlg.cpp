@@ -58,12 +58,16 @@ CHotelSystemDlg::CHotelSystemDlg(CWnd* pParent /*=NULL*/)
 void CHotelSystemDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_EDIT_USERNAME, m_editUsername);
+	DDX_Control(pDX, IDC_EDIT_PASSWORD, m_editPassword);
 }
 
 BEGIN_MESSAGE_MAP(CHotelSystemDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BUTTON_CLEAR, &CHotelSystemDlg::OnBnClickedButtonClear)
+	ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CHotelSystemDlg::OnBnClickedButtonLogin)
 END_MESSAGE_MAP()
 
 
@@ -152,3 +156,25 @@ HCURSOR CHotelSystemDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+BOOL CHotelSystemDlg::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: Add your specialized code here and/or call the base class
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE)
+		return TRUE;
+	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+// 清空输入按钮
+void CHotelSystemDlg::OnBnClickedButtonClear()
+{
+	m_editUsername.SetWindowTextW(_T(""));
+	m_editPassword.SetWindowTextW(_T(""));
+}
+
+// 登录按钮
+void CHotelSystemDlg::OnBnClickedButtonLogin()
+{
+
+}
