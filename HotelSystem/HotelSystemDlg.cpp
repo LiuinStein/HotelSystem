@@ -8,7 +8,6 @@
 #include "afxdialogex.h"
 #include "mysql_conn.h"
 #include "Log.h"
-#include "Hash.h"
 #include <atlconv.h> 
 
 #ifdef _DEBUG
@@ -192,14 +191,7 @@ void CHotelSystemDlg::OnBnClickedButtonLogin()
 	USES_CONVERSION;
 	char * username = W2A(inp_username.GetBuffer());
 	inp_username.ReleaseBuffer();
-	csp::CHash hash;
-	char * pwd = new char[hash.getHashLen() + 2];
-	if(!hash.calcHash(W2A(inp_pwd.GetBuffer()), pwd))
-	{
-		MessageBox(_T("Hash值计算异常"), 0, MB_ICONERROR | MB_OK);
-		aduit::log.insertNewError(aduit::e_error, "Hash值计算异常", GetLastError());
-		return;
-	}
+	char * pwd = W2A(inp_pwd.GetBuffer());
 	inp_pwd.ReleaseBuffer();
 	char info[255];
 	if(db::SQLIsBad(username) || db::SQLIsBad(pwd))

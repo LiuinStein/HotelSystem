@@ -195,7 +195,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Hash.h" />
     <ClInclude Include="HotelSystem.h" />
     <ClInclude Include="HotelSystemDlg.h" />
     <ClInclude Include="Log.h" />
@@ -205,7 +204,6 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Hash.cpp" />
     <ClCompile Include="HotelSystem.cpp" />
     <ClCompile Include="HotelSystemDlg.cpp" />
     <ClCompile Include="Log.cpp" />

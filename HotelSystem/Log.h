@@ -3,6 +3,7 @@
 #define __LOG_H_
 
 #include <afx.h>
+#include <fstream>
 
 // 用于日志审计
 namespace aduit
@@ -22,7 +23,7 @@ namespace aduit
 		const char * m_szError;		// 错误码3
 		char * m_szLastError;	// 最近一次错误
 		UINT m_nErrorNum;		// 错误数
-		CStdioFile * m_wirteto;	// 写入文件
+		std::ofstream * m_wirteto;	// 写入文件
 	public:
 		CLog();
 		// 获取最新的错误信息

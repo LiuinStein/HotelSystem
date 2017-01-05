@@ -2,6 +2,7 @@
 #include "Log.h"
 #include <atlconv.h>
 #include <exception>
+#include <fstream>
 
 aduit::CLog::CLog(): m_szInfo("ÐÅÏ¢"), m_szWarn("¾¯¸æ"), m_szError("´íÎó")
         , m_szLastError(nullptr), m_nErrorNum(0), m_wirteto(nullptr)
@@ -41,12 +42,11 @@ void aduit::CLog::insertNewError(int __errlevel, const char* __errinfo, DWORD __
 	default:
 		errlevel = "Î´Öª´íÎóÂë"; break;
 	}
-	CString err;
-	err.Format(_T("%5d[%hs][%d]: %hs\r\n"), m_nErrorNum, errlevel, __lasterror, errinfo);
+	char err[1024]{};
+	sprintf_s(err, "%5d[%s][%d]: %s\r\n", m_nErrorNum, errlevel, __lasterror, errinfo);
 	if (!m_wirteto)
-		m_wirteto = new CStdioFile(_T("error.list"), CFile::typeText | CFile::modeCreate | CFile::modeWrite);
-	m_wirteto->SeekToEnd();
-	m_wirteto->WriteString(err);
+		m_wirteto = new std::ofstream("error.list", std::ios::app);
+	*m_wirteto << err << std::endl;
 }
 
 aduit::CLog::~CLog()
