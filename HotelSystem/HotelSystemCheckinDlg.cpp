@@ -7,14 +7,14 @@
 #include "afxdialogex.h"
 #include "Log.h"
 #include "mysql_conn.h"
-
+#include "Vector.h"
 
 // CHotelSystemCheckinDlg dialog
 
 IMPLEMENT_DYNAMIC(CHotelSystemCheckinDlg, CDialogEx)
 
 CHotelSystemCheckinDlg::CHotelSystemCheckinDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(IDD_DIALOG_CHECKIN, pParent)
+	: CDialogEx(IDD_DIALOG_CHECKIN, pParent), m_bIsDiscounted(false)
 {
 
 }
@@ -50,6 +50,7 @@ void CHotelSystemCheckinDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CHotelSystemCheckinDlg, CDialogEx)
+	ON_BN_CLICKED(IDC_CHECK_DISCOUNTED, &CHotelSystemCheckinDlg::OnBnClickedCheckDiscounted)
 END_MESSAGE_MAP()
 
 
@@ -68,6 +69,7 @@ BOOL CHotelSystemCheckinDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	m_editPayDiscounted.EnableWindow(FALSE);
 	// 性别下拉框
 	m_comboGuestSex.InsertString(0, _T("男"));
 	m_comboGuestSex.InsertString(1, _T("女"));
@@ -81,4 +83,11 @@ BOOL CHotelSystemCheckinDlg::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+
+void CHotelSystemCheckinDlg::OnBnClickedCheckDiscounted()
+{
+	m_bIsDiscounted = !m_bIsDiscounted;
+	m_editPayDiscounted.EnableWindow(m_bIsDiscounted ? TRUE : FALSE);
 }

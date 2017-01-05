@@ -26,6 +26,9 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnInitDialog();
 
+	afx_msg void OnBnClickedCheckDiscounted();
+
+
 	CEdit m_editGuestName;
 	CComboBox m_comboGuestSex;
 	CEdit m_editGuestYearOld;
@@ -46,4 +49,5 @@ public:
 	CEdit m_editPayTotal;
 	CComboBox m_comboPayMethod;
 	CListCtrl m_listAccount;
+	bool m_bIsDiscounted;
 };
