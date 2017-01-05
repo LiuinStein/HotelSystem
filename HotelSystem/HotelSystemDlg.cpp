@@ -6,6 +6,10 @@
 #include "HotelSystem.h"
 #include "HotelSystemDlg.h"
 #include "afxdialogex.h"
+#include "mysql_conn.h"
+#include "Log.h"
+#include "Hash.h"
+#include <atlconv.h> 
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -103,7 +107,12 @@ BOOL CHotelSystemDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-
+	// 初始化数据库连接
+	if(!db::mysql.initIsSuccess())
+	{
+		MessageBox(_T("数据库连接失败"), 0, MB_ICONERROR | MB_OK);
+		exit(0);
+	}
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -176,5 +185,53 @@ void CHotelSystemDlg::OnBnClickedButtonClear()
 // 登录按钮
 void CHotelSystemDlg::OnBnClickedButtonLogin()
 {
+	CString inp_username;
+	m_editUsername.GetWindowTextW(inp_username);
+	CString inp_pwd;
+	m_editPassword.GetWindowTextW(inp_pwd);
+	USES_CONVERSION;
+	char * username = W2A(inp_username.GetBuffer());
+	inp_username.ReleaseBuffer();
+	csp::CHash hash;
+	char * pwd = new char[hash.getHashLen() + 2];
+	if(!hash.calcHash(W2A(inp_pwd.GetBuffer()), pwd))
+	{
+		MessageBox(_T("Hash值计算异常"), 0, MB_ICONERROR | MB_OK);
+		aduit::log.insertNewError(aduit::e_error, "Hash值计算异常", GetLastError());
+		return;
+	}
+	inp_pwd.ReleaseBuffer();
+	char info[255];
+	if(db::SQLIsBad(username) || db::SQLIsBad(pwd))
+	{
+		sprintf_s(info, "SQL Injection Attack use input %s and %s", username, pwd);
+		aduit::log.insertNewError(aduit::e_warn, info);
+		MessageBox(_T("输入了不合法的字符,重新输入"), 0, MB_ICONERROR | MB_OK);
+		return;
+	}
+	try
+	{
+		char szSqlquery[255];
+		sprintf_s(szSqlquery, "SELECT password FROM login WHERE name='%s'", username);
+		const sql::ResultSet * res = db::mysql.excuteQuery(szSqlquery);
+		std::string strTruePwd;
+		if(db::mysql.resultNext())
+			strTruePwd = res->getString(std::string("password"));
+		if(pwd == strTruePwd)
+		{
+			MessageBox(_T("登录成功"), 0, MB_ICONERROR | MB_OK);
+			// TODO: 窗体跳转代码
+		}
+		else
+		{
+			MessageBox(_T("登录失败,用户名或密码错误"), 0, MB_ICONERROR | MB_OK);
+			m_editPassword.SetWindowTextW(_T(""));
+		}
+	}
+	catch (const sql::SQLException & e)
+	{
+		MessageBox(_T("登录异常"), 0, MB_ICONERROR | MB_OK);
+		aduit::log.insertNewError(aduit::e_error, e.what(), GetLastError());
+	}
 
 }

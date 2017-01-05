@@ -6,20 +6,32 @@
 
 namespace db
 {
-	const char * c_szHostName = "tcp://127.0.0.1:3307";
-	const char * c_szUserName = "root";
-	const char * c_szPassword = "1021";
-	const char * c_szDBName = "hotel";
+	static const char * c_szHostName = "tcp://127.0.0.1:3307";
+	static const char * c_szUserName = "root";
+	static const char * c_szPassword = "1021";
+	static const char * c_szDBName = "hotel";
 
-	sql::Driver * g_pDriver{ nullptr };
-	sql::Connection * g_pConn{ nullptr };
-	sql::Statement * g_pStatement{ nullptr };
-	
-	// 初始化数据库连接
-	bool InitMysql();
+	class CMysql
+	{
+		sql::Driver * m_pDriver;
+		sql::Connection * m_pConn;
+		sql::Statement * m_pStatement;
+		sql::ResultSet * m_pRes;
+
+		bool m_bInitSuccess;
+		bool initMysql();
+	public:
+		bool initIsSuccess()const;
+		const sql::ResultSet * excuteQuery(const char * __sql);
+		bool resultNext();
+		CMysql();
+		~CMysql();
+	};
+
+	static CMysql mysql;
 
 	// 输入防注入
-	bool SQLIsBad(char * __sql);
+	bool SQLIsBad(const char * __sql);
 
 }
 
