@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "HotelSystem.h"
 #include "HotelSystemDlg.h"
+#include "HotelSystemMainDlg.h"
 #include "afxdialogex.h"
 #include "mysql_conn.h"
 #include "Log.h"
@@ -168,7 +169,6 @@ HCURSOR CHotelSystemDlg::OnQueryDragIcon()
 
 BOOL CHotelSystemDlg::PreTranslateMessage(MSG* pMsg)
 {
-	// TODO: Add your specialized code here and/or call the base class
 	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE)
 		return TRUE;
 	return CDialogEx::PreTranslateMessage(pMsg);
@@ -211,8 +211,9 @@ void CHotelSystemDlg::OnBnClickedButtonLogin()
 			strTruePwd = res->getString(std::string("password"));
 		if(pwd == strTruePwd)
 		{
-			MessageBox(_T("登录成功"), 0, MB_ICONERROR | MB_OK);
-			// TODO: 窗体跳转代码
+			this->ShowWindow(SW_HIDE);
+			CHotelSystemMainDlg mainDlg;
+			mainDlg.DoModal();
 		}
 		else
 		{

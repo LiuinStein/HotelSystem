@@ -196,7 +196,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HotelSystem.h" />
+    <ClInclude Include="HotelSystemCheckinDlg.h" />
     <ClInclude Include="HotelSystemDlg.h" />
+    <ClInclude Include="HotelSystemMainDlg.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="mysql_conn.h" />
     <ClInclude Include="Resource.h" />
@@ -205,7 +207,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HotelSystem.cpp" />
+    <ClCompile Include="HotelSystemCheckinDlg.cpp" />
     <ClCompile Include="HotelSystemDlg.cpp" />
+    <ClCompile Include="HotelSystemMainDlg.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="mysql_conn.cpp" />
     <ClCompile Include="stdafx.cpp">

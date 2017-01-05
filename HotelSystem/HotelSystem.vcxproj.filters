@@ -39,6 +39,12 @@
     <ClInclude Include="mysql_conn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HotelSystemMainDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HotelSystemCheckinDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HotelSystem.cpp">
@@ -54,6 +60,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mysql_conn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HotelSystemMainDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HotelSystemCheckinDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
