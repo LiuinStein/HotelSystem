@@ -188,28 +188,27 @@ void CHotelSystemDlg::OnBnClickedButtonLogin()
 	m_editUsername.GetWindowTextW(inp_username);
 	CString inp_pwd;
 	m_editPassword.GetWindowTextW(inp_pwd);
-	USES_CONVERSION;
-	char * username = W2A(inp_username.GetBuffer());
-	inp_username.ReleaseBuffer();
-	char * pwd = W2A(inp_pwd.GetBuffer());
-	inp_pwd.ReleaseBuffer();
-	char info[255];
-	if(db::SQLIsBad(username) || db::SQLIsBad(pwd))
+	if(db::SQLIsBad(inp_username) || db::SQLIsBad(inp_pwd))
 	{
-		sprintf_s(info, "SQL Injection Attack use input %s and %s", username, pwd);
+		CString info;
+		info.Format(_T("SQL Injection Attack use input %s and %s"), inp_username.GetBuffer(), inp_pwd.GetBuffer());
+		inp_username.ReleaseBuffer();
+		inp_pwd.ReleaseBuffer();
 		aduit::log.insertNewError(aduit::e_warn, info);
 		MessageBox(_T("输入了不合法的字符,重新输入"), 0, MB_ICONERROR | MB_OK);
 		return;
 	}
 	try
 	{
-		char szSqlquery[255];
-		sprintf_s(szSqlquery, "SELECT password FROM login WHERE name='%s'", username);
+		CString szSqlquery;
+		szSqlquery.Format(_T("SELECT password FROM login WHERE name='%s'"), inp_username.GetBuffer());
+		inp_username.ReleaseBuffer();
 		const sql::ResultSet * res = db::mysql.excuteQuery(szSqlquery);
 		std::string strTruePwd;
 		if(db::mysql.resultNext())
 			strTruePwd = res->getString(std::string("password"));
-		if(pwd == strTruePwd)
+		CString pwdCmp(strTruePwd.c_str());
+		if(inp_pwd == pwdCmp)
 		{
 			this->ShowWindow(SW_HIDE);
 			CHotelSystemMainDlg mainDlg;

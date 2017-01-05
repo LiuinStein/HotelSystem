@@ -23,6 +23,7 @@ namespace db
 	public:
 		bool initIsSuccess()const;
 		const sql::ResultSet * excuteQuery(const char * __sql);
+		const sql::ResultSet * excuteQuery(CString & __sql);
 		bool resultNext();
 		CMysql();
 		~CMysql();
@@ -32,6 +33,8 @@ namespace db
 
 	//  ‰»Î∑¿◊¢»Î
 	bool SQLIsBad(const char * __sql);
+
+	bool SQLIsBad(CString & __sql);
 
 }
 

@@ -24,6 +24,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL OnInitDialog();
+
 	CEdit m_editGuestName;
 	CComboBox m_comboGuestSex;
 	CEdit m_editGuestYearOld;

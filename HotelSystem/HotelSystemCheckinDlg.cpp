@@ -5,6 +5,8 @@
 #include "HotelSystem.h"
 #include "HotelSystemCheckinDlg.h"
 #include "afxdialogex.h"
+#include "Log.h"
+#include "mysql_conn.h"
 
 
 // CHotelSystemCheckinDlg dialog
@@ -59,4 +61,24 @@ BOOL CHotelSystemCheckinDlg::PreTranslateMessage(MSG* pMsg)
 	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE)
 		return TRUE;
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+BOOL CHotelSystemCheckinDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// 性别下拉框
+	m_comboGuestSex.InsertString(0, _T("男"));
+	m_comboGuestSex.InsertString(1, _T("女"));
+	// 证件类型
+	m_comboGuestIDCardType.InsertString(0, _T("身份证"));
+	m_comboGuestIDCardType.InsertString(1, _T("军人证"));
+	m_comboGuestIDCardType.InsertString(2, _T("护照"));
+	m_comboGuestIDCardType.InsertString(3, _T("港澳同胞证"));
+	// 获取房间类型
+
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }

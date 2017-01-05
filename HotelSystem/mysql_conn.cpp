@@ -2,6 +2,7 @@
 #include "mysql_conn.h"
 #include "Log.h"
 #include <cctype>
+#include <atlconv.h>
 
 bool db::CMysql::initMysql()
 {
@@ -58,6 +59,15 @@ const sql::ResultSet* db::CMysql::excuteQuery(const char* __sql)
 	}
 }
 
+// Ö´ÐÐSQLÓï¾ä
+const sql::ResultSet* db::CMysql::excuteQuery(CString& __sql)
+{
+	USES_CONVERSION;
+	char * szQuery = W2A(__sql.GetBuffer());
+	__sql.ReleaseBuffer();
+	return excuteQuery(szQuery);
+}
+
 bool db::CMysql::resultNext()
 {
 	return m_pRes->next();
@@ -75,6 +85,14 @@ bool db::SQLIsBad(const char* __sql)
 		if (strstr(tmp, block[i]))
 			return true;
 	return false;
+}
+
+bool db::SQLIsBad(CString& __sql)
+{
+	USES_CONVERSION;
+	char * szSQL = W2A(__sql.GetBuffer());
+	__sql.ReleaseBuffer();
+	return SQLIsBad(szSQL);
 }
 
 db::CMysql::CMysql()

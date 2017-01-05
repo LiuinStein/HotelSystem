@@ -29,6 +29,7 @@ namespace aduit
 		// 获取最新的错误信息
 		const char * getLastError()const;
 		// 插入错误
+		void insertNewError(int __errlevel, CString & __errinfo, DWORD __lasterror = 0);
 		void insertNewError(int __errlevel, const wchar_t * __errinfo, DWORD __lasterror = 0);
 		void insertNewError(int __errlevel, const char * __errinfo, DWORD __lasterror = 0);
 		~CLog();

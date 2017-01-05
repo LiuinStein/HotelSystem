@@ -14,6 +14,12 @@ const char * aduit::CLog::getLastError() const
 	return m_szLastError;
 }
 
+void aduit::CLog::insertNewError(int __errlevel, CString& __errinfo, DWORD __lasterror)
+{
+	insertNewError(__errlevel, __errinfo.GetBuffer(), __lasterror);
+	__errinfo.ReleaseBuffer();
+}
+
 
 void aduit::CLog::insertNewError(int __errlevel, const wchar_t * __errinfo, DWORD __lasterror)
 {
