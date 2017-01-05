@@ -5,7 +5,7 @@
 namespace stl
 {
 	typedef int Rank;	//秩
-	const int Default_Capacity = 10;	//初始预留空间
+	const int c_nDefaultCapacity = 10;	//初始预留空间
 	enum Order
 	{
 		A_Z,	//升序排列
@@ -14,36 +14,15 @@ namespace stl
 		None	//未排序
 	};
 
-	class Fib
+	class CFib
 	{
-		long long Now,		//当前项
-			Add;		//加法因子
+		long long m_nNow,		//当前项
+			m_nAdd;		//加法因子
 	public:
-		Fib(int n)	//初始化为不小于n的最小Fibonacci项
-		{
-			Now = 1, Add = 0;
-			while (Now < n)
-				next();
-		}
-		long long next()
-		{
-			//1...fib(k)=fib(k-1)+fib(k-2)
-			//2...fib(k-2)=fib(k-1)-fib(k-3)
-			Now += Add;	//Add 相当于1中的fib(k-2)
-						//计算下一个Add的值,现在知道了fib(k)
-						//并且现在在Add中存放着fib(k-2)
-			Add = Now - Add;	//fib(k-1)=fib(k)-fib(k-2)
-			return Now;
-		}
-		long long prev()
-		{
-			//当前Now中存放着fib(k),Add中存放着fib(k-1)
-			//我要让Now变为fib(k-1),而Add变为fib(k-2)
-			Add = Now - Add;	//fib(k-2)=fib(k)-fib(k-1)
-			Now -= Add;			//fib(k-1)=fib(k)-fib(k-2)
-			return Now;
-		}
-		long long getFib() { return Now; }
+		CFib(int n); //初始化为不小于n的最小Fibonacci项
+		long long next();
+		long long prev();
+		long long getFib() const;
 	};
 
 	template<typename T>
@@ -52,9 +31,9 @@ namespace stl
 	protected:
 
 		//内部数据区
-		Rank _size;		//当前规模,最大秩-1
-		int _capacity;	//当前容量
-		T * _elem;		//数据区，采用动态数组来管理数据
+		Rank m_nSize;		//当前规模,最大秩-1
+		int m_nCapacity;	//当前容量
+		T * m_tElem;		//数据区，采用动态数组来管理数据
 
 		//内部函数区
 		//数值操作类函数

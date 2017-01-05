@@ -5,23 +5,23 @@ template <typename T>
 void stl::CVector<T>::copyFrom(const T* __From, Rank __lo, Rank __hi)
 {
 	//分配空间,实际分配空间为初始化大小的两倍
-	_elem = new T[_capacity = (__hi - __lo) << 1];
-	_size = 0;	//初始化规模
+	m_tElem = new T[m_nCapacity = (__hi - __lo) << 1];
+	m_nSize = 0;	//初始化规模
 	while (__lo < __hi)
-		_elem[_size++] = __From[__lo++];	//赋值
+		m_tElem[m_nSize++] = __From[__lo++];	//赋值
 }
 
 template <typename T>
 void stl::CVector<T>::expand()
 {
-	if (_size < _capacity)
+	if (m_nSize < m_nCapacity)
 		return;							//尚未满员时不必扩容
-	if (Default_Capacity > _capacity)
-		_capacity = Default_Capacity;	//保证capacity大于默认值
-	T * OldElem = _elem;				//临时指针指向原数据的地址
-	_elem = new T[_capacity <<= 1];		//将数组大小扩大一倍
-	for (int i = 0; i < _size; i++)
-		_elem[i] = OldElem[i];			//将原数组内容拷贝到新数组
+	if (c_nDefaultCapacity > m_nCapacity)
+		m_nCapacity = c_nDefaultCapacity;	//保证capacity大于默认值
+	T * OldElem = m_tElem;				//临时指针指向原数据的地址
+	m_tElem = new T[m_nCapacity <<= 1];		//将数组大小扩大一倍
+	for (int i = 0; i < m_nSize; i++)
+		m_tElem[i] = OldElem[i];			//将原数组内容拷贝到新数组
 	delete[] OldElem;					//释放旧数组
 }
 
@@ -30,26 +30,26 @@ void stl::CVector<T>::shrink()
 {
 	//为避免程序反复出现交替缩容和扩容的情况,可将装填因子设置的小一点,或者为0(禁止缩容)
 	//在这里,装填因子以25%为界,小于25%则进行缩容,大小缩至原来的1/2
-	if (_capacity >> 1 < Default_Capacity)
+	if (m_nCapacity >> 1 < c_nDefaultCapacity)
 		return;	//不能缩到比默认capacity小
-	if (_size > _capacity >> 2)	//_size>1/4_capacity
+	if (m_nSize > m_nCapacity >> 2)	//_size>1/4_capacity
 		return;	//装填因子大于25%不必缩容
-	T * OldElem = _elem;
-	_elem = new T[_capacity >>= 1];	//容量减半
-	for (int i = 0; i < _size; i++)
-		_elem[i] = OldElem[i];
+	T * OldElem = m_tElem;
+	m_tElem = new T[m_nCapacity >>= 1];	//容量减半
+	for (int i = 0; i < m_nSize; i++)
+		m_tElem[i] = OldElem[i];
 	delete[] OldElem;
 }
 
 template <typename T>
 void stl::CVector<T>::merge(Rank __lo, Rank __mi, Rank __hi)
 {
-	T * A = _elem + __lo;	//合并后的向量A[0,__hi-__lo)=_elem[__lo,__hi)
+	T * A = m_tElem + __lo;	//合并后的向量A[0,__hi-__lo)=m_tElem[__lo,__hi)
 	int lb{ __mi - __lo };	//中点之前的元素个数
-	T * B = new T[lb];		//前子向量B[0,lb)=_elem[0,__mi)
+	T * B = new T[lb];		//前子向量B[0,lb)=m_tElem[0,__mi)
 	for (Rank i = 0; i < lb; B[i] = A[i++]);//复制前子向量
 	int lc{ __hi - __mi };	//后子向量元素个数
-	T * C = _elem + __mi;	//C[0,lc)=_elem[__mi,__hi)
+	T * C = m_tElem + __mi;	//C[0,lc)=m_tElem[__mi,__hi)
 							//至此,前子向量和后子向量就被拿出来了
 							//其中A为指向前子向量第一个元素的指针
 							//B为前子向量的备份,C为指向后子向量第一个元素的指针
@@ -144,8 +144,8 @@ int stl::CVector<T>::unique()
 template <typename T>
 void stl::CVector<T>::traverse(void(* visit)(T&))
 {
-	for (int i = 0; i < _size; i++)
-		visit(_elem[i]);
+	for (int i = 0; i < m_nSize; i++)
+		visit(m_tElem[i]);
 }
 
 template <typename T>
@@ -153,13 +153,13 @@ void stl::CVector<T>::swap(Rank __a, Rank __b)
 {
 	/*这样的交换方法只适用于整型,不适用于浮点型
 	//所以还是使用比较通用的方法
-	_elem[__a] = _elem[__a] ^ _elem[__b];
-	_elem[__b] = _elem[__a] ^ _elem[__b];
-	_elem[__a] = _elem[__a] ^ _elem[__b];
+	m_tElem[__a] = m_tElem[__a] ^ m_tElem[__b];
+	m_tElem[__b] = m_tElem[__a] ^ m_tElem[__b];
+	m_tElem[__a] = m_tElem[__a] ^ m_tElem[__b];
 	*/
-	T tmp = _elem[__a];
-	_elem[__a] = _elem[__b];
-	_elem[__b] = tmp;
+	T tmp = m_tElem[__a];
+	m_tElem[__a] = m_tElem[__b];
+	m_tElem[__b] = tmp;
 }
 
 template <typename T>
@@ -170,10 +170,10 @@ int stl::CVector<T>::orderUnique()
 	*元素均在最前,相同的元素均在最后,直接截取结尾元素即可
 	*/
 	Rank i = 0, j = 0;
-	while (++j < _size)
-		if (_elem[i] != _elem[j])	//跳过相同的元素
-			_elem[++i] = _elem[j];
-	_size = ++i;
+	while (++j < m_nSize)
+		if (m_tElem[i] != m_tElem[j])	//跳过相同的元素
+			m_tElem[++i] = m_tElem[j];
+	m_nSize = ++i;
 	shrink();
 	return j - i;
 }
@@ -181,20 +181,20 @@ int stl::CVector<T>::orderUnique()
 template <typename T>
 int stl::CVector<T>::unOrderUnique()
 {
-	int OldSize = _size;	//记录原始大小
+	int OldSize = m_nSize;	//记录原始大小
 	Rank i = 0;				//从第0个开始向后找
-	while (i < _size)
-		find(_elem[i], i + 1, _size) == -1 ?
+	while (i < m_nSize)
+		find(m_tElem[i], i + 1, m_nSize) == -1 ?
 		i++ :		//找不到
 		remove(i);	//找到了删除,并且保持i不变,直到找不到为止
-	return OldSize - _size;
+	return OldSize - m_nSize;
 }
 
 template <typename T>
 stl::Rank stl::CVector<T>::unorderFind(const T& __f, Rank __lo, Rank __hi) const
 {
 	int i = __lo;
-	for (; (i < __hi) && (_elem[i] != __f); i++);
+	for (; (i < __hi) && (m_tElem[i] != __f); i++);
 	return i;
 }
 
@@ -205,10 +205,10 @@ stl::Rank stl::CVector<T>::binSearch(const T& __f, Rank __lo, Rank __hi) const
 	{
 		Rank mid = (__hi + __lo) >> 1;
 		//划分两个区间[__lo,mid)和[mid,__hi)
-		(__f < _elem[mid]) ? __hi = mid : __lo = mid;
+		(__f < m_tElem[mid]) ? __hi = mid : __lo = mid;
 		//即便查找成功这个算法也不能提前终止
 	}	//出口时__hi=__lo+1,查找区间仅剩一个元素__lo
-	return __f == _elem[__lo] ? __lo : -1;
+	return __f == m_tElem[__lo] ? __lo : -1;
 	//这个也不能保证有多个命中元素时的返回值的秩是最小的那一个
 	//通过对全部相同元素序列的观察即可发现
 }
@@ -216,7 +216,7 @@ stl::Rank stl::CVector<T>::binSearch(const T& __f, Rank __lo, Rank __hi) const
 template <typename T>
 stl::Rank stl::CVector<T>::fibSearch(const T& __f, Rank __lo, Rank __hi) const
 {
-	Fib fib(__hi - __lo);	//创建斐波那契数列
+	CFib fib(__hi - __lo);	//创建斐波那契数列
 	while (__lo < __hi)
 	{
 		while (__hi - __lo < fib.getFib())
@@ -225,9 +225,9 @@ stl::Rank stl::CVector<T>::fibSearch(const T& __f, Rank __lo, Rank __hi) const
 		Rank mid = Rank(__lo + fib.getFib() - 1);
 		//查找算法的本质为将二分查找法的查找中点
 		//变为了黄金分割点
-		if (__f < _elem[mid])
+		if (__f < m_tElem[mid])
 			__hi = mid;
-		else if (_elem[mid] < __f)
+		else if (m_tElem[mid] < __f)
 			__lo = mid + 1;
 		else
 			return mid;
@@ -239,15 +239,15 @@ stl::Rank stl::CVector<T>::fibSearch(const T& __f, Rank __lo, Rank __hi) const
 template <typename T>
 stl::CVector<T>::CVector()
 {
-	_elem = new T[_capacity = Default_Capacity];
-	_size = 0;
+	m_tElem = new T[m_nCapacity = c_nDefaultCapacity];
+	m_nSize = 0;
 }
 
 template <typename T>
 stl::CVector<T>::CVector(int __c, int __s, T __i)
 {
-	_elem = new T[_capacity = __c]; //分配内存并赋值
-	for (_size = 0; _size < __s; _elem[_size++] = __i);
+	m_tElem = new T[m_nCapacity = __c]; //分配内存并赋值
+	for (m_nSize = 0; m_nSize < __s; m_tElem[m_nSize++] = __i);
 	//一行代码完成了为_size赋值和为数组赋默认值
 }
 
@@ -260,31 +260,31 @@ stl::CVector<T>::CVector(const T* __i, Rank __hi, Rank __lo)
 template <typename T>
 stl::CVector<T>::CVector(const CVector<T>& __i)
 {
-	copyFrom(__i._elem, 0, __i._size);
+	copyFrom(__i.m_tElem, 0, __i.m_nSize);
 }
 
 template <typename T>
 stl::CVector<T>::CVector(const CVector<T>& __i, Rank __lo, Rank __hi)
 {
-	copyFrom(__i._elem, __lo, __hi);
+	copyFrom(__i.m_tElem, __lo, __hi);
 }
 
 template <typename T>
 stl::CVector<T>::~CVector()
 {
-	delete[] _elem;
+	delete[] m_tElem;
 }
 
 template <typename T>
 stl::Rank stl::CVector<T>::size() const
 {
-	return _size;
+	return m_nSize;
 }
 
 template <typename T>
 bool stl::CVector<T>::empty() const
 {
-	return !_size;
+	return !m_nSize;
 }
 
 template <typename T>
@@ -293,10 +293,10 @@ stl::Order stl::CVector<T>::ordered() const
 	int az{},	//升序数
 		za{},	//降序数
 		aa{};	//相等数
-	for (int i = 1; i < _size; i++)
-		if (_elem[i - 1] > _elem[i])
+	for (int i = 1; i < m_nSize; i++)
+		if (m_tElem[i - 1] > m_tElem[i])
 			za++;
-		else if (_elem[i - 1] < _elem[i])
+		else if (m_tElem[i - 1] < m_tElem[i])
 			az++;
 		else
 			aa++;
@@ -328,22 +328,22 @@ stl::Rank stl::CVector<T>::find(const T& __f, Rank __lo, Rank __hi) const
 template <typename T>
 T& stl::CVector<T>::operator[](Rank __r) const
 {
-	return _elem[__r];
+	return m_tElem[__r];
 }
 
 template <typename T>
 stl::CVector<T>& stl::CVector<T>::operator=(CVector<T> const& __t)
 {
-	if (_size)	//copyFrom函数会为向量分配空间,所以如果_elem中有内容的话,
-		delete[] _elem;	//删除_elem
-	copyFrom(__t._elem, 0, __t._size);
+	if (m_nSize)	//copyFrom函数会为向量分配空间,所以如果_elem中有内容的话,
+		delete[] m_tElem;	//删除_elem
+	copyFrom(__t.m_tElem, 0, __t.m_nSize);
 	return *this;
 }
 
 template <typename T>
 T stl::CVector<T>::remove(Rank __d)
 {
-	T tmp = _elem[__d];
+	T tmp = m_tElem[__d];
 	remove(__d, __d + 1);	//相当于处理__d,__d+1的情况
 	return tmp;
 }
@@ -351,9 +351,9 @@ T stl::CVector<T>::remove(Rank __d)
 template <typename T>
 int stl::CVector<T>::remove(Rank __lo, Rank __hi)
 {
-	while (__hi < _size)
-		_elem[__lo++] = _elem[__hi++];
-	_size = __lo;
+	while (__hi < m_nSize)
+		m_tElem[__lo++] = m_tElem[__hi++];
+	m_nSize = __lo;
 	shrink();			//如有必要,缩容
 	return __hi - __lo;
 }
@@ -361,17 +361,17 @@ int stl::CVector<T>::remove(Rank __lo, Rank __hi)
 template <typename T>
 int stl::CVector<T>::clear()
 {
-	return remove(0, _size);
+	return remove(0, m_nSize);
 }
 
 template <typename T>
 stl::Rank stl::CVector<T>::insert(Rank __inp, const T& __e)
 {
 	expand();	//如有必要,扩容
-	for (int i = _size; i > __inp; i--)
-		_elem[i] = _elem[i - 1];
-	_elem[__inp] = __e;
-	_size++;
+	for (int i = m_nSize; i > __inp; i--)
+		m_tElem[i] = m_tElem[i - 1];
+	m_tElem[__inp] = __e;
+	m_nSize++;
 	return __inp;
 }
 
@@ -384,6 +384,37 @@ void stl::CVector<T>::push_front(const T& __e)
 template <typename T>
 void stl::CVector<T>::push_back(const T& __e)
 {
-	insert(_size, __e);
+	insert(m_nSize, __e);
 }
 
+stl::CFib::CFib(int n)
+{
+	m_nNow = 1 , m_nAdd = 0;
+	while (m_nNow < n)
+		next();
+}
+
+long long stl::CFib::next()
+{
+	//1...fib(k)=fib(k-1)+fib(k-2)
+	//2...fib(k-2)=fib(k-1)-fib(k-3)
+	m_nNow += m_nAdd; //Add 相当于1中的fib(k-2)
+	//计算下一个Add的值,现在知道了fib(k)
+	//并且现在在Add中存放着fib(k-2)
+	m_nAdd = m_nNow - m_nAdd; //fib(k-1)=fib(k)-fib(k-2)
+	return m_nNow;
+}
+
+long long stl::CFib::prev()
+{
+	//当前Now中存放着fib(k),Add中存放着fib(k-1)
+	//我要让Now变为fib(k-1),而Add变为fib(k-2)
+	m_nAdd = m_nNow - m_nAdd; //fib(k-2)=fib(k)-fib(k-1)
+	m_nNow -= m_nAdd; //fib(k-1)=fib(k)-fib(k-2)
+	return m_nNow;
+}
+
+long long stl::CFib::getFib() const
+{
+	return m_nNow;
+}
