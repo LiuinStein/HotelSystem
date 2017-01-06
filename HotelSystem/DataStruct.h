@@ -28,7 +28,8 @@ namespace data
 		int m_nGuestID;
 		bool m_nIsDirty;
 	};
-
+	// 依据条件获取房间,默认输出全部房间
+	bool GetRoomByCondition(stl::CVector<SRoom> & __store, const char * __con = "1=1");
 	// 获取所有的房间
 	bool GetAllRoom();
 	// 获取所有可用房间

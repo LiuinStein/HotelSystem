@@ -50,6 +50,7 @@ void CHotelSystemCheckinDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CHotelSystemCheckinDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK_DISCOUNTED, &CHotelSystemCheckinDlg::OnBnClickedCheckDiscounted)
+	ON_CBN_SELCHANGE(IDC_COMBO_ROOMTYPE, &CHotelSystemCheckinDlg::OnSelchangeComboRoomtype)
 END_MESSAGE_MAP()
 
 
@@ -78,7 +79,15 @@ BOOL CHotelSystemCheckinDlg::OnInitDialog()
 	m_comboGuestIDCardType.InsertString(2, _T("护照"));
 	m_comboGuestIDCardType.InsertString(3, _T("港澳同胞证"));
 	// 获取房间类型
-	
+	if(g_vecRoomType.size() == 0 && !data::GetRoomType())
+	{
+		MessageBox(_T("CHotelSystemCheckinDlg::OnInitDialog获取房间类型信息失败"), 0, MB_ICONERROR | MB_OK);
+		g_log.insertNewError(aduit::e_error, "CHotelSystemCheckinDlg::OnInitDialog获取房间类型信息失败");
+		EndDialog(IDCANCEL);
+		return FALSE;
+	}
+	for (int i = 0; i < g_vecRoomType.size(); i++)
+		m_comboRoomType.InsertString(i, CString(g_vecRoomType[i].m_nName.c_str()));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
@@ -89,4 +98,25 @@ void CHotelSystemCheckinDlg::OnBnClickedCheckDiscounted()
 {
 	m_bIsDiscounted = !m_bIsDiscounted;
 	m_editPayDiscounted.EnableWindow(m_bIsDiscounted ? TRUE : FALSE);
+}
+
+// 用户切换了房间类型选择框的选择
+void CHotelSystemCheckinDlg::OnSelchangeComboRoomtype()
+{
+
+
+	//if (g_vecAllRoom.size() == 0 && !data::GetAllRoom())
+	//{
+	//	MessageBox(_T("OnSelchangeComboRoomtype获取所有楼层信息失败"), 0, MB_ICONERROR | MB_OK);
+	//	g_log.insertNewError(aduit::e_error, "OnSelchangeComboRoomtype获取所有楼层信息失败");
+	//	return;
+	//}
+	//char tmp{};
+	//for (int i = 0, j = 0; i< g_vecAllRoom.size(); i++)
+	//	if (g_vecAllRoom[i].m_nRoomID / 100 != tmp)
+	//	{
+	//		tmp = g_vecAllRoom[i].m_nRoomID / 100;
+	//		m_comboRoomFloor.InsertString(j++, CString(char(tmp + '0')));
+	//	}
+
 }

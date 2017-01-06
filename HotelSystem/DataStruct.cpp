@@ -32,23 +32,25 @@ bool data::GetRoomType()
 	return true;
 }
 
-bool data::GetAllRoom()
+bool data::GetRoomByCondition(stl::CVector<SRoom>& __store, const char* __con)
 {
-	g_vecAllRoom.clear();
+	__store.clear();
+	std::string sql("SELECT * FROM room WHERE ");
+	sql += __con;
 	try
 	{
-		g_mysql.excuteQuery("SELECT * FROM room");
-		while(g_mysql.resultNext())
+		g_mysql.excuteQuery(sql.c_str());
+		while (g_mysql.resultNext())
 		{
 			SRoom tmp;
 			tmp.m_nRoomID = g_mysql.getResultSet()->getInt("id");
 			tmp.m_nTypeID = g_mysql.getResultSet()->getInt("typeid");
 			tmp.m_nGuestID = g_mysql.getResultSet()->getInt("guestid");
 			tmp.m_nIsDirty = g_mysql.getResultSet()->getBoolean("dirty");
-			g_vecAllRoom.push_back(tmp);
+			__store.push_back(tmp);
 		}
 	}
-	catch (const sql::SQLException &e)
+	catch (const sql::SQLException& e)
 	{
 		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
 		return false;
@@ -56,7 +58,12 @@ bool data::GetAllRoom()
 	return true;
 }
 
+bool data::GetAllRoom()
+{
+	return GetRoomByCondition(g_vecAllRoom);
+}
+
 bool data::GetAvailableRoom()
 {
-	return true;
+	return GetRoomByCondition(g_vecAvailableRoom, "guestid=0");
 }

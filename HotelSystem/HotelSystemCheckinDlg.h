@@ -50,4 +50,5 @@ public:
 	CComboBox m_comboPayMethod;
 	CListCtrl m_listAccount;
 	bool m_bIsDiscounted;
+	afx_msg void OnSelchangeComboRoomtype();
 };

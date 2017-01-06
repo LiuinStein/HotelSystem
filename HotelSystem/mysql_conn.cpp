@@ -10,13 +10,14 @@ bool db::CMysql::initMysql()
 		char info[255];
 		m_pDriver = sql::mysql::get_driver_instance();
 		m_pConn = m_pDriver->connect(c_szHostName, c_szUserName, c_szPassword);
+		sprintf_s(info, "使用用户名 %s 连接到数据库服务器 %s", c_szUserName, c_szHostName);
+		g_log.insertNewError(aduit::e_info, info);
 		m_pConn->setSchema(c_szDBName);
-		sprintf_s(info, "Use Database %s", c_szDBName);
+		sprintf_s(info, "使用数据库%s", c_szDBName);
 		g_log.insertNewError(aduit::e_info, info);
 		m_pStatement = m_pConn->createStatement();
+		m_pStatement->execute("set names 'GBK'");		// 设置数据库编码格式
 		m_pConn->setAutoCommit(0);
-		sprintf_s(info, "Connect to %s use %s", c_szHostName, c_szUserName);
-		g_log.insertNewError(aduit::e_info, info);
 	}
 	catch (sql::SQLException &e)
 	{

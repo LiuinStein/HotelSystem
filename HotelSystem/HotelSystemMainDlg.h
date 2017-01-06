@@ -30,4 +30,5 @@ public:
 	CListCtrl m_listSplash;
 	afx_msg void OnClose();
 	afx_msg void OnBnClickedButtonRefresh();
+	afx_msg void OnBnClickedButtonCheckin();
 };
