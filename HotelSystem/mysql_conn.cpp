@@ -73,6 +73,40 @@ bool db::CMysql::resultNext()
 	return m_pRes->next();
 }
 
+const sql::ResultSet* db::CMysql::getResultSet() const
+{
+	return m_pRes;
+}
+
+// 将结果集放入CVector
+template<typename T>
+bool db::CMysql::resultGetColVector(T(*__get)(const sql::SQLString &), const sql::SQLString & __col, stl::CVector<T>& __vec)
+{
+	if (!__get || !m_pRes)
+	{
+		aduit::log.insertNewError(aduit::e_error, "resultGetColVector指针悬垂", GetLastError());
+		return false;
+	}
+	try
+	{
+		__vec.clear();
+		while (m_pRes->previous());	// 游标回退
+		while (m_pRes->next())
+			__vec.push_back(__get(__col));
+	}
+	catch (const sql::SQLException &e)
+	{
+		aduit::log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		return false;
+	}
+	catch (const std::exception &e)
+	{
+		aduit::log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		return false;
+	}
+	return true;
+}
+
 bool db::SQLIsBad(const char* __sql)
 {
 	size_t len = strlen(__sql) + 2;
