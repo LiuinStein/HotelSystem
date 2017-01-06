@@ -5,8 +5,7 @@
 #include "HotelSystem.h"
 #include "HotelSystemMainDlg.h"
 #include "afxdialogex.h"
-#include "Log.h"
-#include "mysql_conn.h"
+#include "GlobalVariable.h"
 
 // CHotelSystemMainDlg dialog
 
@@ -17,7 +16,7 @@ void CHotelSystemMainDlg::refreshList()
 {
 	if(!m_listSplash.DeleteAllItems())
 	{
-		aduit::log.insertNewError(aduit::e_error, "DeleteAllItems清空列表失败", GetLastError());
+		g_log.insertNewError(aduit::e_error, "DeleteAllItems清空列表失败", GetLastError());
 		return;
 	}
 	// TODO: 与数据结构结合的高潮部分,暂时忽略

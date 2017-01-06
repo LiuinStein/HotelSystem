@@ -54,3 +54,6 @@ void aduit::CLog::insertNewError(int __errlevel, const char* __errinfo, DWORD __
 aduit::CLog::~CLog()
 {
 }
+
+aduit::CLog g_log;
+

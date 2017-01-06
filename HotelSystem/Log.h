@@ -29,7 +29,6 @@ namespace aduit
 		~CLog();
 	};
 
-	static CLog log;
 }
 
 #endif // !__LOG_H_

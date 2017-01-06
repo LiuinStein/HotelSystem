@@ -7,8 +7,7 @@
 #include "HotelSystemDlg.h"
 #include "HotelSystemMainDlg.h"
 #include "afxdialogex.h"
-#include "mysql_conn.h"
-#include "Log.h"
+#include "GlobalVariable.h"
 #include <atlconv.h> 
 
 #ifdef _DEBUG
@@ -108,7 +107,7 @@ BOOL CHotelSystemDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 	// 初始化数据库连接
-	if(!db::mysql.initIsSuccess())
+	if(!g_mysql.initIsSuccess())
 	{
 		MessageBox(_T("数据库连接失败"), 0, MB_ICONERROR | MB_OK);
 		exit(0);
@@ -194,7 +193,7 @@ void CHotelSystemDlg::OnBnClickedButtonLogin()
 		info.Format(_T("SQL Injection Attack use input %s and %s"), inp_username.GetBuffer(), inp_pwd.GetBuffer());
 		inp_username.ReleaseBuffer();
 		inp_pwd.ReleaseBuffer();
-		aduit::log.insertNewError(aduit::e_warn, info);
+		g_log.insertNewError(aduit::e_warn, info);
 		MessageBox(_T("输入了不合法的字符,重新输入"), 0, MB_ICONERROR | MB_OK);
 		return;
 	}
@@ -203,9 +202,9 @@ void CHotelSystemDlg::OnBnClickedButtonLogin()
 		CString szSqlquery;
 		szSqlquery.Format(_T("SELECT password FROM login WHERE name='%s'"), inp_username.GetBuffer());
 		inp_username.ReleaseBuffer();
-		const sql::ResultSet * res = db::mysql.excuteQuery(szSqlquery);
+		const sql::ResultSet * res = g_mysql.excuteQuery(szSqlquery);
 		std::string strTruePwd;
-		if(db::mysql.resultNext())
+		if(g_mysql.resultNext())
 			strTruePwd = res->getString(std::string("password"));
 		CString pwdCmp(strTruePwd.c_str());
 		if(inp_pwd == pwdCmp)
@@ -223,7 +222,7 @@ void CHotelSystemDlg::OnBnClickedButtonLogin()
 	catch (const sql::SQLException & e)
 	{
 		MessageBox(_T("登录异常"), 0, MB_ICONERROR | MB_OK);
-		aduit::log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
 	}
 
 }

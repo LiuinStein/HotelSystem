@@ -5,8 +5,7 @@
 #include "HotelSystem.h"
 #include "HotelSystemCheckinDlg.h"
 #include "afxdialogex.h"
-#include "Log.h"
-#include "mysql_conn.h"
+#include "GlobalVariable.h"
 #include "Vector.h"
 
 // CHotelSystemCheckinDlg dialog

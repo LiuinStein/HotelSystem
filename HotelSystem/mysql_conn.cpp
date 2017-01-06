@@ -1,6 +1,5 @@
 #include "stdafx.h"
-#include "mysql_conn.h"
-#include "Log.h"
+#include "GlobalVariable.h"
 #include <cctype>
 #include <atlconv.h>
 
@@ -13,20 +12,20 @@ bool db::CMysql::initMysql()
 		m_pConn = m_pDriver->connect(c_szHostName, c_szUserName, c_szPassword);
 		m_pConn->setSchema(c_szDBName);
 		sprintf_s(info, "Use Database %s", c_szDBName);
-		aduit::log.insertNewError(aduit::e_info, info);
+		g_log.insertNewError(aduit::e_info, info);
 		m_pStatement = m_pConn->createStatement();
 		m_pConn->setAutoCommit(0);
 		sprintf_s(info, "Connect to %s use %s", c_szHostName, c_szUserName);
-		aduit::log.insertNewError(aduit::e_info, info);
+		g_log.insertNewError(aduit::e_info, info);
 	}
 	catch (sql::SQLException &e)
 	{
-		aduit::log.insertNewError(aduit::e_error, e.what());
+		g_log.insertNewError(aduit::e_error, e.what());
 		return false;
 	}
 	catch (std::runtime_error &e)
 	{
-		aduit::log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
 		return false;
 	}
 	return true;
@@ -49,12 +48,12 @@ const sql::ResultSet* db::CMysql::excuteQuery(const char* __sql)
 	}
 	catch (const sql::SQLException &e)
 	{
-		aduit::log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
 		return nullptr;
 	}
 	catch (const std::exception&e)
 	{
-		aduit::log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
 		return nullptr;
 	}
 }
@@ -84,7 +83,7 @@ bool db::CMysql::resultGetColVector(T(*__get)(const sql::SQLString &), const sql
 {
 	if (!__get || !m_pRes)
 	{
-		aduit::log.insertNewError(aduit::e_error, "resultGetColVector÷∏’Î–¸¥π", GetLastError());
+		g_log.insertNewError(aduit::e_error, "resultGetColVector÷∏’Î–¸¥π", GetLastError());
 		return false;
 	}
 	try
@@ -96,12 +95,12 @@ bool db::CMysql::resultGetColVector(T(*__get)(const sql::SQLString &), const sql
 	}
 	catch (const sql::SQLException &e)
 	{
-		aduit::log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
 		return false;
 	}
 	catch (const std::exception &e)
 	{
-		aduit::log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
 		return false;
 	}
 	return true;
@@ -144,3 +143,6 @@ db::CMysql::CMysql()
 db::CMysql::~CMysql()
 {
 }
+
+db::CMysql g_mysql;
+

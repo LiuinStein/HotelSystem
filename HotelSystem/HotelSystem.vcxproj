@@ -196,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataStruct.h" />
+    <ClInclude Include="GlobalVariable.h" />
     <ClInclude Include="HotelSystem.h" />
     <ClInclude Include="HotelSystemCheckinDlg.h" />
     <ClInclude Include="HotelSystemDlg.h" />

@@ -35,7 +35,6 @@ namespace db
 		~CMysql();
 	};
 
-	static CMysql mysql;
 
 	//  ‰»Î∑¿◊¢»Î
 	bool SQLIsBad(const char * __sql);
@@ -43,5 +42,6 @@ namespace db
 	bool SQLIsBad(CString & __sql);
 
 }
+
 
 #endif // !__MYSQL_CONN_H_

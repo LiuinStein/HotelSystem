@@ -17,12 +17,10 @@ namespace data
 		DECIMAL m_dPrice;
 		int m_nPeopleNum;
 	};
-	// 房间类型
-	static stl::CVector<SRoomType> g_vecRoomType;		
+	
 	// 从数据库中获取所有的房间类型
 	bool GetRoomType();
 
-	
 	struct SRoom
 	{
 		int m_nRoomID;	
@@ -30,11 +28,10 @@ namespace data
 		int m_nGuestID;
 		bool m_nIsDirty;
 	};
-	// 所有的房间信息
-	static stl::CVector<SRoom> g_vecAllRoom;
+
 	// 获取所有的房间
 	bool GetAllRoom();
-	static stl::CVector<SRoom> g_vecAvailableRoom;
+	// 获取所有可用房间
 	bool GetAvailableRoom();
 
 }
