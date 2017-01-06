@@ -1,17 +1,11 @@
 #include "stdafx.h"
 #include "Log.h"
 #include <atlconv.h>
-#include <exception>
 #include <fstream>
+#include <Windows.h>
 
-aduit::CLog::CLog(): m_szInfo("信息"), m_szWarn("警告"), m_szError("错误")
-        , m_szLastError(nullptr), m_nErrorNum(0), m_wirteto(nullptr)
+aduit::CLog::CLog(): m_nErrorNum(0), m_wirteto(nullptr)
 {
-}
-
-const char * aduit::CLog::getLastError() const
-{
-	return m_szLastError;
 }
 
 void aduit::CLog::insertNewError(int __errlevel, CString& __errinfo, DWORD __lasterror)
@@ -30,28 +24,31 @@ void aduit::CLog::insertNewError(int __errlevel, const wchar_t * __errinfo, DWOR
 
 void aduit::CLog::insertNewError(int __errlevel, const char* __errinfo, DWORD __lasterror)
 {
-	const char * errinfo{};
-	!__errinfo ? errinfo = "未知错误信息" : errinfo = __errinfo;
-	if (m_szLastError)
-		delete m_szLastError;
-	m_szLastError = new char[strlen(errinfo) + 2];
-	strcpy_s(m_szLastError, strlen(errinfo) + 2, errinfo);
+	const char * errinfo{ !__errinfo ? "未知错误信息" : __errinfo };
 	const char * errlevel;
 	switch (__errlevel)
 	{
 	case e_info:
-		errlevel = m_szInfo; break;
+		errlevel = "信息"; break;
 	case e_warn:
-		errlevel = m_szWarn; break;
+		errlevel = "警告"; break;
 	case e_error:
-		errlevel = m_szError; break;
+		errlevel = "错误"; break;
 	default:
 		errlevel = "未知错误码"; break;
 	}
+
+	SYSTEMTIME nowTime;
+	GetLocalTime(&nowTime);
+	char time[25]{};
+	sprintf_s(time, "%d/%d/%d %d:%d:%d", nowTime.wYear, nowTime.wMonth, nowTime.wDay, nowTime.wHour, nowTime.wMinute, nowTime.wSecond);
 	char err[1024]{};
-	sprintf_s(err, "%5d[%s][%d]: %s", m_nErrorNum++, errlevel, __lasterror, errinfo);
+	sprintf_s(err, "%s %5d[%s][%5d]: %s", time, m_nErrorNum++, errlevel, __lasterror, errinfo);
 	if (!m_wirteto)
-		m_wirteto = new std::ofstream("error.list", std::ios::app);
+	{
+		m_wirteto = new std::ofstream("error.log", std::ios::app);
+		*m_wirteto << std::endl << time << "  编号[等级][系统错误码]: 信息" << std::endl;
+	}
 	*m_wirteto << err << std::endl;
 }
 
