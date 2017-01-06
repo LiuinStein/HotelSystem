@@ -37,7 +37,6 @@ void aduit::CLog::insertNewError(int __errlevel, const char* __errinfo, DWORD __
 	default:
 		errlevel = "未知错误码"; break;
 	}
-
 	SYSTEMTIME nowTime;
 	GetLocalTime(&nowTime);
 	char time[25]{};
@@ -47,7 +46,7 @@ void aduit::CLog::insertNewError(int __errlevel, const char* __errinfo, DWORD __
 	if (!m_wirteto)
 	{
 		m_wirteto = new std::ofstream("error.log", std::ios::app);
-		*m_wirteto << std::endl << time << "  编号[等级][系统错误码]: 信息" << std::endl;
+		*m_wirteto << std::endl << "时间\t\t 编号[等级][系统错误码]: 信息" << std::endl;
 	}
 	*m_wirteto << err << std::endl;
 }

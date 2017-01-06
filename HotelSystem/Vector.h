@@ -242,16 +242,18 @@ namespace stl
 		//二分查找算法
 		Rank binSearch(const T & __f, Rank __lo, Rank __hi)const
 		{
-			while (1 < __hi - __lo)
+			//算法不能保证当有多个命中元素时,返回的秩到底是哪一个
+			while (__lo < __hi)
 			{
-				Rank mid = (__hi + __lo) >> 1;
-				//划分两个区间[__lo,mid)和[mid,__hi)
-				(__f < m_tElem[mid]) ? __hi = mid : __lo = mid;
-				//即便查找成功这个算法也不能提前终止
-			}	//出口时__hi=__lo+1,查找区间仅剩一个元素__lo
-			return __f == m_tElem[__lo] ? __lo : -1;
-			//这个也不能保证有多个命中元素时的返回值的秩是最小的那一个
-			//通过对全部相同元素序列的观察即可发现
+				Rank mid = (__lo + __hi) >> 1;	//中间
+				if (__f < m_tElem[mid])
+					__hi = mid;
+				else if (m_tElem[mid] < __f)
+					__lo = mid + 1;
+				else
+					return mid;
+			}
+			return -1;	//查找失败
 		}
 
 		//斐波那契查找算法
@@ -368,16 +370,11 @@ namespace stl
 		Rank find(const T & __f, Rank __lo, Rank __hi)const
 		{
 			if (ordered() != None)
-				return
-				//fibSearch(__f, __lo, __hi);
-				binSearch(__f, __lo, __hi);
-			else
-			{
-				Rank res = UnorderFind(__f, __lo, __hi);
-				//UnorderFind函数在查找失败的情况下返回的是__hi
-				//所以在此处需要一个判断
-				return res == __hi ? -1 : res;
-			}
+				return fibSearch(__f, __lo, __hi);
+			Rank res = unorderFind(__f, __lo, __hi);
+			//UnorderFind函数在查找失败的情况下返回的是__hi
+			//所以在此处需要一个判断
+			return res == __hi ? -1 : res;
 		}
 
 		//可写访问接口
