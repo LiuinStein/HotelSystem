@@ -79,7 +79,18 @@ BOOL CHotelSystemCheckinDlg::OnInitDialog()
 	m_comboGuestIDCardType.InsertString(2, _T("护照"));
 	m_comboGuestIDCardType.InsertString(3, _T("港澳同胞证"));
 	// 获取房间类型
+	try
+	{
 
+	}
+	catch (const sql::SQLException &e)
+	{
+		
+	}
+	catch (const std::exception &e)
+	{
+
+	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE

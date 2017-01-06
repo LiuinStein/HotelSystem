@@ -49,7 +49,7 @@ void aduit::CLog::insertNewError(int __errlevel, const char* __errinfo, DWORD __
 		errlevel = "Î´Öª´íÎóÂë"; break;
 	}
 	char err[1024]{};
-	sprintf_s(err, "%5d[%s][%d]: %s\r\n", m_nErrorNum, errlevel, __lasterror, errinfo);
+	sprintf_s(err, "%5d[%s][%d]: %s", m_nErrorNum++, errlevel, __lasterror, errinfo);
 	if (!m_wirteto)
 		m_wirteto = new std::ofstream("error.list", std::ios::app);
 	*m_wirteto << err << std::endl;
