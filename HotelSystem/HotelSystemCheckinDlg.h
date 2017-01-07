@@ -35,6 +35,7 @@ public:
 	bool GetInfoFromDlg();
 	bool GetInfoFromEdit(CEdit & __from, std::string & __info, bool __isnessary = true);
 	bool GetInfoFromCombo(CComboBox & __from, std::string & __info, bool __isnessary = true);
+	void emptyRoomInfo();
 
 	struct SRoomInfo
 	{
@@ -42,6 +43,13 @@ public:
 		UINT m_stayDay;
 		double m_prePay;	// 从数据库中获取的原价
 		double m_despoit;	// 折扣信息
+		CString m_cstrRoomid;		// 房间号
+		CString m_cstrRoomType;	// 房间类型
+		CString m_cstrPrePrice;	// 原价
+		CString m_cstrDiscounted;	// 折扣
+		CString m_cstrPrice;	// 现价
+		CString m_cstrStayDay;	// 预留时间
+		CString m_cstrTotal;
 	};
 
 	CEdit m_editGuestName;

@@ -96,12 +96,23 @@ BOOL CHotelSystemCheckinDlg::OnInitDialog()
 	}
 	for (int i = 0; i < g_vecRoomType.size(); i++)
 		m_comboRoomType.InsertString(i, CString(g_vecRoomType[i].m_nName.c_str()));
+	// 初始化账单详情列表框
+	// 标记全行选中和栅栏风格
+	m_listAccount.SetExtendedStyle(m_listAccount.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+	// 插入列
+	m_listAccount.InsertColumn(0, _T("房间号"), LVCFMT_CENTER, 100, 50);
+	m_listAccount.InsertColumn(1, _T("房间类型"), LVCFMT_CENTER, 100, 50);
+	m_listAccount.InsertColumn(2, _T("原价"), LVCFMT_CENTER, 100, 50);
+	m_listAccount.InsertColumn(3, _T("折扣"), LVCFMT_CENTER, 100, 50);
+	m_listAccount.InsertColumn(4, _T("现价"), LVCFMT_CENTER, 100, 50);
+	m_listAccount.InsertColumn(5, _T("预留时间"), LVCFMT_CENTER, 100, 50);
+	m_listAccount.InsertColumn(6, _T("此项共计"), LVCFMT_CENTER, 100, 50);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-
+// 点击是否折扣单选框
 void CHotelSystemCheckinDlg::OnBnClickedCheckDiscounted()
 {
 	m_bIsDiscounted = !m_bIsDiscounted;
@@ -174,7 +185,27 @@ void CHotelSystemCheckinDlg::OnBnClickedButtonAppendroom()
 {
 	if(!GetInfoFromDlg())
 		return;
-
+	if(m_vecRoom.size() == 0)
+	{
+		g_log.insertNewError(aduit::e_error, "m_vecRoom.size()异常,异常位于CHotelSystemCheckinDlg::OnBnClickedButtonAppendroom()", GetLastError());
+		return;
+	}
+	// 插入列表
+	for (int i = 0; i < m_vecRoom.size() - 1; i++)
+		if(m_vecRoom[i].m_basicInfo.m_nRoomID == m_vecRoom[m_vecRoom.size() - 1].m_basicInfo.m_nRoomID)
+		{
+			m_vecRoom.remove(m_vecRoom.size() - 1);
+			MessageBox(_T("此房间您已预约过"), 0, MB_ICONINFORMATION | MB_OK);
+			return;
+		}
+	m_listAccount.InsertItem(m_vecRoom.size() - 1, m_vecRoom[m_vecRoom.size() - 1].m_cstrRoomid);
+	m_listAccount.SetItemText(m_vecRoom.size() - 1, 1, m_vecRoom[m_vecRoom.size() - 1].m_cstrRoomType);
+	m_listAccount.SetItemText(m_vecRoom.size() - 1, 2, m_vecRoom[m_vecRoom.size() - 1].m_cstrPrePrice);
+	m_listAccount.SetItemText(m_vecRoom.size() - 1, 3, m_vecRoom[m_vecRoom.size() - 1].m_cstrDiscounted);
+	m_listAccount.SetItemText(m_vecRoom.size() - 1, 4, m_vecRoom[m_vecRoom.size() - 1].m_cstrPrice);
+	m_listAccount.SetItemText(m_vecRoom.size() - 1, 5, m_vecRoom[m_vecRoom.size() - 1].m_cstrStayDay);
+	m_listAccount.SetItemText(m_vecRoom.size() - 1, 6, m_vecRoom[m_vecRoom.size() - 1].m_cstrTotal);
+	emptyRoomInfo();
 }
 
 // 从界面获取信息
@@ -190,30 +221,39 @@ bool CHotelSystemCheckinDlg::GetInfoFromDlg()
 		))
 		return false;
 	// 获取非必需的宾客信息
-	GetInfoFromEdit(m_editGuestYearOld, m_sGuest.m_strYearOld);	// 年龄
-	GetInfoFromEdit(m_editGuestAddr, m_sGuest.m_strAddress);	// 联系地址
-	GetInfoFromEdit(m_editGuestCompName, m_sGuest.m_strCompName);	// 公司名
-	GetInfoFromEdit(m_editGuestCompAddr, m_sGuest.m_strCompAddr);	// 公司地址
+	GetInfoFromEdit(m_editGuestYearOld, m_sGuest.m_strYearOld, false);	// 年龄
+	GetInfoFromEdit(m_editGuestAddr, m_sGuest.m_strAddress, false);	// 联系地址
+	GetInfoFromEdit(m_editGuestCompName, m_sGuest.m_strCompName, false);	// 公司名
+	GetInfoFromEdit(m_editGuestCompAddr, m_sGuest.m_strCompAddr, false);	// 公司地址
 
 	// 获取房间信息(全部必需)
 	SRoomInfo tmp;
-	tmp.m_basicInfo.m_nTypeID = m_comboRoomNumber.GetCurSel() + 1;
 	tmp.m_basicInfo.m_nIsDirty = false;	// 新房默认干净
+	// 获取房间类型
+	tmp.m_basicInfo.m_nTypeID = m_comboRoomType.GetCurSel() + 1;
+	m_comboRoomType.GetWindowTextW(tmp.m_cstrRoomType);
 	std::string tmpstr;
 	// 获取房间号
 	if (!GetInfoFromCombo(m_comboRoomNumber, tmpstr))
 		return false;
 	tmp.m_basicInfo.m_nRoomID = atoi(tmpstr.c_str());
+	tmp.m_cstrRoomid = tmpstr.c_str();
 	// 获取预留时间
 	if (!GetInfoFromEdit(m_editStayTime, tmpstr))
 		return false;
 	tmp.m_stayDay = atoi(tmpstr.c_str());
+	tmp.m_cstrStayDay = tmpstr.c_str();
 	// 获取折扣
 	if (m_bIsDiscounted)
 	{
 		if (!GetInfoFromEdit(m_editPayDiscounted, tmpstr))
 			return false;
 		tmp.m_despoit = double(atoi(tmpstr.c_str())) / 10.0;
+		if(tmp.m_despoit > 1.0 || tmp.m_despoit <= 0)
+		{
+			m_editPayDiscounted.ShowBalloonTip(_T("提示"), _T("折扣范围必需小于10且大于等于1"), TTI_INFO);
+			return false;
+		}
 	}
 	else
 		tmp.m_despoit = 1;
@@ -231,6 +271,13 @@ bool CHotelSystemCheckinDlg::GetInfoFromDlg()
 		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
 		return false;
 	}
+	tmp.m_cstrPrePrice.Format(_T("%.2lf"), tmp.m_prePay);
+	// 获取折扣金额和现价
+	tmp.m_cstrDiscounted.Format(_T("-%.2lf"), (1.0 - tmp.m_despoit) * tmp.m_prePay);
+	tmp.m_cstrPrice.Format(_T("%.2lf"), tmp.m_despoit * tmp.m_prePay);
+	// 计算此项共计费用
+	tmp.m_cstrTotal.Format(_T("%.2lf"), tmp.m_despoit * tmp.m_prePay * tmp.m_stayDay);
+
 	tmp.m_basicInfo.m_nGuestID = 0;
 	m_vecRoom.push_back(tmp);
 }
@@ -262,4 +309,14 @@ bool CHotelSystemCheckinDlg::GetInfoFromCombo(CComboBox& __from, std::string& __
 	__info = W2A(tmp.GetBuffer());
 	tmp.ReleaseBuffer();
 	return true;
+}
+
+// 用来置空房间信息栏
+void CHotelSystemCheckinDlg::emptyRoomInfo()
+{
+	m_comboRoomNumber.ResetContent();
+	m_comboRoomFloor.ResetContent();
+	m_comboRoomType.SetWindowTextW(_T(""));
+	m_editStayTime.SetWindowTextW(_T(""));
+	m_editPayDiscounted.SetWindowTextW(_T(""));
 }
