@@ -1,7 +1,6 @@
 #pragma once
 #ifndef __DATA_STRUCT_H_
 #define __DATA_STRUCT_H_
-#include <string>
 #include "Vector.h"
 
 namespace data
@@ -17,9 +16,10 @@ namespace data
 		DECIMAL m_dPrice;
 		int m_nPeopleNum;
 	};
-	
+	// 依据所给条件获取房间类型,默认获取所有房间类型
+	bool GetGetRoomTypeByCondition(stl::CVector<SRoomType> & __store, const char * __con = "1=1");
 	// 从数据库中获取所有的房间类型
-	bool GetRoomType();
+	bool GetAllRoomType();
 
 	struct SRoom
 	{

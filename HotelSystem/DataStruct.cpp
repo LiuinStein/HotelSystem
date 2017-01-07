@@ -8,20 +8,22 @@ stl::CVector<data::SRoom> g_vecAllRoom;
 // 获取所有可用房间
 stl::CVector<data::SRoom> g_vecAvailableRoom;
 
-bool data::GetRoomType()
+bool data::GetGetRoomTypeByCondition(stl::CVector<SRoomType>& __store, const char* __con)
 {
-	g_vecRoomType.clear();
+	__store.clear();
+	std::string sql("SELECT * FROM room_type WHERE ");
+	sql += __con;
 	try
 	{
-		g_mysql.excuteQuery("SELECT * FROM room_type");
-		while(g_mysql.resultNext())
+		g_mysql.excuteQuery(sql);
+		while (g_mysql.resultNext())
 		{
 			SRoomType tmp;
 			tmp.m_nTypeID = g_mysql.getResultSet()->getInt("id");
 			tmp.m_nName = g_mysql.getResultSet()->getString("name");
 			tmp.m_dPrice = g_mysql.getResultSet()->getDouble("price");
 			tmp.m_nPeopleNum = g_mysql.getResultSet()->getInt("peoplenum");
-			g_vecRoomType.push_back(tmp);
+			__store.push_back(tmp);
 		}
 	}
 	catch (const sql::SQLException &e)
@@ -32,6 +34,11 @@ bool data::GetRoomType()
 	return true;
 }
 
+bool data::GetAllRoomType()
+{
+	return GetGetRoomTypeByCondition(g_vecRoomType);
+}
+
 bool data::GetRoomByCondition(stl::CVector<SRoom>& __store, const char* __con)
 {
 	__store.clear();
@@ -39,7 +46,7 @@ bool data::GetRoomByCondition(stl::CVector<SRoom>& __store, const char* __con)
 	sql += __con;
 	try
 	{
-		g_mysql.excuteQuery(sql.c_str());
+		g_mysql.excuteQuery(sql);
 		while (g_mysql.resultNext())
 		{
 			SRoom tmp;

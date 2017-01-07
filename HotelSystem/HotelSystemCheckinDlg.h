@@ -51,4 +51,5 @@ public:
 	CListCtrl m_listAccount;
 	bool m_bIsDiscounted;
 	afx_msg void OnSelchangeComboRoomtype();
+	afx_msg void OnSelchangeComboFloor();
 };

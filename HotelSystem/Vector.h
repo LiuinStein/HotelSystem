@@ -108,6 +108,12 @@ namespace stl
 
 		//算法类
 		//排序类函数
+		// 内置排序比较器
+		bool compare(const T & __small, const T & __big)
+		{
+			return __small < __big ? true : false;
+		}
+
 		//归并算法
 		void merge(Rank __lo, Rank __mi, Rank __hi)
 		{
@@ -135,7 +141,7 @@ namespace stl
 										//当k>=lc时!(k<lc)为真,所以在逻辑或表达式比中
 										//第一个为真时后面的Compare(B[j], C[k])不会被计算
 										//所以!(k<lc)||的设计是防止越界
-						(Compare(B[j], C[k]))//到这里之前的前两个条件
+						(compare(B[j], C[k]))//到这里之前的前两个条件
 											 //!(k < lc)||和(j < lb)&&都是为了保证不越界设计的
 											 //那么到这里就引发了重点
 											 //也就是整个表达式的核心意思
@@ -163,7 +169,7 @@ namespace stl
 				if ((k < lc) &&
 					(
 						!(j < lb) ||	//跟上面讲的原理一样前两个是为了保证不越界
-						(Compare(C[k], B[j]))
+						(compare(C[k], B[j]))
 						//整个表达式的核心意思,由此转为
 						//在保证不越界的情况下,如果C[k]<B[j]的话
 						//在第一步中,也就是判断后子序列的第1个
@@ -440,6 +446,11 @@ namespace stl
 		}
 
 		//归并排序
+		void mergeSort()
+		{
+			mergeSort(0, m_nSize);
+		}
+
 		void mergeSort(Rank __lo, Rank __hi)
 		{
 			//与冒泡排序通过反复调用单趟扫描交换类似,归并排序

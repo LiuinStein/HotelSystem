@@ -68,6 +68,11 @@ const sql::ResultSet* db::CMysql::excuteQuery(CString& __sql)
 	return excuteQuery(szQuery);
 }
 
+const sql::ResultSet* db::CMysql::excuteQuery(const std::string& __sql)
+{
+	return excuteQuery(__sql.c_str());
+}
+
 bool db::CMysql::resultNext()
 {
 	return m_pRes->next();

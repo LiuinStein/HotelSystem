@@ -51,6 +51,7 @@ void CHotelSystemCheckinDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CHotelSystemCheckinDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK_DISCOUNTED, &CHotelSystemCheckinDlg::OnBnClickedCheckDiscounted)
 	ON_CBN_SELCHANGE(IDC_COMBO_ROOMTYPE, &CHotelSystemCheckinDlg::OnSelchangeComboRoomtype)
+	ON_CBN_SELCHANGE(IDC_COMBO_FLOOR, &CHotelSystemCheckinDlg::OnSelchangeComboFloor)
 END_MESSAGE_MAP()
 
 
@@ -79,7 +80,7 @@ BOOL CHotelSystemCheckinDlg::OnInitDialog()
 	m_comboGuestIDCardType.InsertString(2, _T("护照"));
 	m_comboGuestIDCardType.InsertString(3, _T("港澳同胞证"));
 	// 获取房间类型
-	if(g_vecRoomType.size() == 0 && !data::GetRoomType())
+	if(g_vecRoomType.size() == 0 && !data::GetAllRoomType())
 	{
 		MessageBox(_T("CHotelSystemCheckinDlg::OnInitDialog获取房间类型信息失败"), 0, MB_ICONERROR | MB_OK);
 		g_log.insertNewError(aduit::e_error, "CHotelSystemCheckinDlg::OnInitDialog获取房间类型信息失败");
@@ -103,20 +104,60 @@ void CHotelSystemCheckinDlg::OnBnClickedCheckDiscounted()
 // 用户切换了房间类型选择框的选择
 void CHotelSystemCheckinDlg::OnSelchangeComboRoomtype()
 {
+	// 当用户切换完成的时候,在这里初始化楼层信息组合框
+	int nRoomTypeID{ m_comboRoomType.GetCurSel() + 1 };
+	std::string sql("SELECT id FROM room WHERE typeid=");
+	sql += char(nRoomTypeID + '0');
+	sql += " ORDER BY id ASC";
+	stl::CVector<int> vecRoomFloor;
+	try
+	{
+		g_mysql.excuteQuery(sql);
+		while (g_mysql.resultNext())
+			vecRoomFloor.push_back(g_mysql.getResultSet()->getInt("id"));
+	}
+	catch (const sql::SQLException& e)
+	{
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		return;
+	}
+	m_comboRoomFloor.ResetContent();	// 清空之前的内容
+	char tmp{};
+	for (int i = 0, j = 0; i< vecRoomFloor.size(); i++)
+		if (vecRoomFloor[i] / 100 != tmp)
+		{
+			tmp = vecRoomFloor[i] / 100;
+			m_comboRoomFloor.InsertString(j++, CString(char(tmp + '0')));
+		}
+}
 
-
-	//if (g_vecAllRoom.size() == 0 && !data::GetAllRoom())
-	//{
-	//	MessageBox(_T("OnSelchangeComboRoomtype获取所有楼层信息失败"), 0, MB_ICONERROR | MB_OK);
-	//	g_log.insertNewError(aduit::e_error, "OnSelchangeComboRoomtype获取所有楼层信息失败");
-	//	return;
-	//}
-	//char tmp{};
-	//for (int i = 0, j = 0; i< g_vecAllRoom.size(); i++)
-	//	if (g_vecAllRoom[i].m_nRoomID / 100 != tmp)
-	//	{
-	//		tmp = g_vecAllRoom[i].m_nRoomID / 100;
-	//		m_comboRoomFloor.InsertString(j++, CString(char(tmp + '0')));
-	//	}
-
+// 用户切换了楼层编号
+void CHotelSystemCheckinDlg::OnSelchangeComboFloor()
+{
+	// 初始化可用房间号信息
+	CString cstrFloor;
+	m_comboRoomFloor.GetLBText(m_comboRoomFloor.GetCurSel(), cstrFloor);
+	int nRoomTypeID{ m_comboRoomType.GetCurSel() + 1 };
+	CString sql;
+	sql.Format(_T("SELECT id FROM room WHERE id LIKE '%s__' AND guestid=0 AND typeid=%d ORDER BY id ASC"), cstrFloor.GetBuffer(), nRoomTypeID);
+	cstrFloor.ReleaseBuffer();
+	stl::CVector<int> vecRoomID;
+	try
+	{
+		g_mysql.excuteQuery(sql);
+		while (g_mysql.resultNext())
+			vecRoomID.push_back(g_mysql.getResultSet()->getInt("id"));
+	}
+	catch (const sql::SQLException& e)
+	{
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		return;
+	}
+	m_comboRoomNumber.ResetContent();
+	CString tmp;
+	for (int i = 0; i < vecRoomID.size(); i++)
+	{
+		tmp.Format(_T("%d"), vecRoomID[i]);
+		m_comboRoomNumber.InsertString(i, tmp);
+	}
 }
