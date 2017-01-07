@@ -53,6 +53,7 @@ BEGIN_MESSAGE_MAP(CHotelSystemCheckinDlg, CDialogEx)
 	ON_CBN_SELCHANGE(IDC_COMBO_ROOMTYPE, &CHotelSystemCheckinDlg::OnSelchangeComboRoomtype)
 	ON_CBN_SELCHANGE(IDC_COMBO_FLOOR, &CHotelSystemCheckinDlg::OnSelchangeComboFloor)
 	ON_BN_CLICKED(IDC_BUTTON_APPENDROOM, &CHotelSystemCheckinDlg::OnBnClickedButtonAppendroom)
+	ON_BN_CLICKED(IDC_BUTTON_CALC, &CHotelSystemCheckinDlg::OnBnClickedButtonCalc)
 END_MESSAGE_MAP()
 
 
@@ -102,9 +103,9 @@ BOOL CHotelSystemCheckinDlg::OnInitDialog()
 	// 插入列
 	m_listAccount.InsertColumn(0, _T("房间号"), LVCFMT_CENTER, 100, 50);
 	m_listAccount.InsertColumn(1, _T("房间类型"), LVCFMT_CENTER, 100, 50);
-	m_listAccount.InsertColumn(2, _T("原价"), LVCFMT_CENTER, 100, 50);
-	m_listAccount.InsertColumn(3, _T("折扣"), LVCFMT_CENTER, 100, 50);
-	m_listAccount.InsertColumn(4, _T("现价"), LVCFMT_CENTER, 100, 50);
+	m_listAccount.InsertColumn(2, _T("原价每天"), LVCFMT_CENTER, 100, 50);
+	m_listAccount.InsertColumn(3, _T("折扣每天"), LVCFMT_CENTER, 100, 50);
+	m_listAccount.InsertColumn(4, _T("现价每天"), LVCFMT_CENTER, 100, 50);
 	m_listAccount.InsertColumn(5, _T("预留时间"), LVCFMT_CENTER, 100, 50);
 	m_listAccount.InsertColumn(6, _T("此项共计"), LVCFMT_CENTER, 100, 50);
 
@@ -280,6 +281,7 @@ bool CHotelSystemCheckinDlg::GetInfoFromDlg()
 
 	tmp.m_basicInfo.m_nGuestID = 0;
 	m_vecRoom.push_back(tmp);
+	return true;
 }
 
 // 从编辑框从获取信息
@@ -319,4 +321,30 @@ void CHotelSystemCheckinDlg::emptyRoomInfo()
 	m_comboRoomType.SetWindowTextW(_T(""));
 	m_editStayTime.SetWindowTextW(_T(""));
 	m_editPayDiscounted.SetWindowTextW(_T(""));
+}
+
+// 计算总价按钮事件响应
+void CHotelSystemCheckinDlg::OnBnClickedButtonCalc()
+{
+	std::string strDeposit;
+	if (!GetInfoFromEdit(m_editPayDeposite, strDeposit))
+		return;
+	int nDeposit{ atoi(strDeposit.c_str()) };
+	double dPrePrice{};
+	double dDiscounted{};
+	double dTotal{};
+	for (int i = 0; i < m_vecRoom.size(); i++)
+	{
+		dPrePrice += m_vecRoom[i].m_prePay * m_vecRoom[i].m_stayDay;
+		dDiscounted += (1.0 - m_vecRoom[i].m_despoit) * m_vecRoom[i].m_prePay;
+		dTotal += m_vecRoom[i].m_despoit * m_vecRoom[i].m_prePay * m_vecRoom[i].m_stayDay;
+	}
+	dTotal += nDeposit;
+	CString tmp;
+	tmp.Format(_T("%.2lf"), dPrePrice);
+	m_editPayPrePrice.SetWindowTextW(tmp);
+	tmp.Format(_T("%.2lf"), dDiscounted);
+	m_editPayLess.SetWindowTextW(tmp);
+	tmp.Format(_T("%.2lf"), dTotal);
+	m_editPayTotal.SetWindowTextW(tmp);
 }

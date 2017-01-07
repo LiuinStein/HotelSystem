@@ -76,4 +76,5 @@ public:
 	data::SGuest m_sGuest;
 	stl::CVector<SRoomInfo> m_vecRoom;
 
+	afx_msg void OnBnClickedButtonCalc();
 };
