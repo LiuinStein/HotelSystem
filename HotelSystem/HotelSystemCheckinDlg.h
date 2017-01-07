@@ -31,6 +31,8 @@ public:
 	afx_msg void OnSelchangeComboRoomtype();
 	afx_msg void OnSelchangeComboFloor();
 	afx_msg void OnBnClickedButtonAppendroom();
+	afx_msg void OnBnClickedButtonCalc();
+	afx_msg void OnBnClickedButtonRemoveroom();
 
 	bool GetInfoFromDlg();
 	bool GetInfoFromEdit(CEdit & __from, std::string & __info, bool __isnessary = true);
@@ -75,6 +77,7 @@ public:
 	bool m_bIsDiscounted;
 	data::SGuest m_sGuest;
 	stl::CVector<SRoomInfo> m_vecRoom;
+	int m_nCilckListLine;
 
-	afx_msg void OnBnClickedButtonCalc();
+	afx_msg void OnClickListAccount(NMHDR *pNMHDR, LRESULT *pResult);
 };

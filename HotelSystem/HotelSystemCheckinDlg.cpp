@@ -14,6 +14,7 @@ IMPLEMENT_DYNAMIC(CHotelSystemCheckinDlg, CDialogEx)
 
 CHotelSystemCheckinDlg::CHotelSystemCheckinDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DIALOG_CHECKIN, pParent), m_bIsDiscounted(false)
+	, m_nCilckListLine(-1)
 {
 
 }
@@ -54,6 +55,8 @@ BEGIN_MESSAGE_MAP(CHotelSystemCheckinDlg, CDialogEx)
 	ON_CBN_SELCHANGE(IDC_COMBO_FLOOR, &CHotelSystemCheckinDlg::OnSelchangeComboFloor)
 	ON_BN_CLICKED(IDC_BUTTON_APPENDROOM, &CHotelSystemCheckinDlg::OnBnClickedButtonAppendroom)
 	ON_BN_CLICKED(IDC_BUTTON_CALC, &CHotelSystemCheckinDlg::OnBnClickedButtonCalc)
+	ON_BN_CLICKED(IDC_BUTTON_REMOVEROOM, &CHotelSystemCheckinDlg::OnBnClickedButtonRemoveroom)
+	ON_NOTIFY(NM_CLICK, IDC_LIST_ACCOUNT, &CHotelSystemCheckinDlg::OnClickListAccount)
 END_MESSAGE_MAP()
 
 
@@ -347,4 +350,34 @@ void CHotelSystemCheckinDlg::OnBnClickedButtonCalc()
 	m_editPayLess.SetWindowTextW(tmp);
 	tmp.Format(_T("%.2lf"), dTotal);
 	m_editPayTotal.SetWindowTextW(tmp);
+}
+
+// 移除房间按钮事件响应
+void CHotelSystemCheckinDlg::OnBnClickedButtonRemoveroom()
+{
+	if (m_nCilckListLine == -1)
+		return;
+	CString cstrDelRoomID = m_listAccount.GetItemText(m_nCilckListLine, 0);
+	if (cstrDelRoomID == _T(""))
+		return;
+	// 或许,比较整数的效率要比比较字符串的效率高吧
+	int nDelRoomID{ _ttoi(cstrDelRoomID) };
+	for (int i = 0; i < m_vecRoom.size(); i++)
+		if(m_vecRoom[i].m_basicInfo.m_nRoomID == nDelRoomID)
+		{
+			m_vecRoom.remove(i);
+			break;
+		}
+	// 删除信息
+	m_listAccount.DeleteItem(m_nCilckListLine);
+	m_nCilckListLine = -1;	// 干完活之后一定马上复原
+}
+
+// 点击控件获取行号
+void CHotelSystemCheckinDlg::OnClickListAccount(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	NM_LISTVIEW * pNMListView = reinterpret_cast<NM_LISTVIEW*>(pNMHDR);
+	m_nCilckListLine = pNMListView->iItem;	// 获取选中行信息
+	*pResult = 0;
 }
