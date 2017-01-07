@@ -33,6 +33,8 @@ public:
 	afx_msg void OnBnClickedButtonAppendroom();
 	afx_msg void OnBnClickedButtonCalc();
 	afx_msg void OnBnClickedButtonRemoveroom();
+	afx_msg void OnClickListAccount(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedButtonPayandsave();
 
 	bool GetInfoFromDlg();
 	bool GetInfoFromEdit(CEdit & __from, std::string & __info, bool __isnessary = true);
@@ -79,5 +81,5 @@ public:
 	stl::CVector<SRoomInfo> m_vecRoom;
 	int m_nCilckListLine;
 
-	afx_msg void OnClickListAccount(NMHDR *pNMHDR, LRESULT *pResult);
+
 };

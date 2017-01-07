@@ -57,6 +57,7 @@ BEGIN_MESSAGE_MAP(CHotelSystemCheckinDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_CALC, &CHotelSystemCheckinDlg::OnBnClickedButtonCalc)
 	ON_BN_CLICKED(IDC_BUTTON_REMOVEROOM, &CHotelSystemCheckinDlg::OnBnClickedButtonRemoveroom)
 	ON_NOTIFY(NM_CLICK, IDC_LIST_ACCOUNT, &CHotelSystemCheckinDlg::OnClickListAccount)
+	ON_BN_CLICKED(IDC_BUTTON_PAYANDSAVE, &CHotelSystemCheckinDlg::OnBnClickedButtonPayandsave)
 END_MESSAGE_MAP()
 
 
@@ -333,6 +334,7 @@ void CHotelSystemCheckinDlg::OnBnClickedButtonCalc()
 	if (!GetInfoFromEdit(m_editPayDeposite, strDeposit))
 		return;
 	int nDeposit{ atoi(strDeposit.c_str()) };
+	m_sGuest.m_dDeposit = nDeposit;
 	double dPrePrice{};
 	double dDiscounted{};
 	double dTotal{};
@@ -380,4 +382,101 @@ void CHotelSystemCheckinDlg::OnClickListAccount(NMHDR *pNMHDR, LRESULT *pResult)
 	NM_LISTVIEW * pNMListView = reinterpret_cast<NM_LISTVIEW*>(pNMHDR);
 	m_nCilckListLine = pNMListView->iItem;	// 获取选中行信息
 	*pResult = 0;
+}
+
+// 支付并保存按钮事件响应
+void CHotelSystemCheckinDlg::OnBnClickedButtonPayandsave()
+{
+	std::string tmp;
+	GetInfoFromCombo(m_comboPayMethod, tmp);
+	try
+	{
+		USES_CONVERSION;
+		// guest表没有外键约束,先加guest表
+		CString sql{ "INSERT INTO `guest` VALUES (" };
+		CString cstrtmp;
+		// 获取id
+		std::string sqltmp{ "SELECT COUNT(*) AS id FROM guest" };
+		g_mysql.excuteQuery(sqltmp);
+		int nID{};
+		if (g_mysql.resultNext())
+			nID = g_mysql.getResultSet()->getInt("id");
+		cstrtmp.Format(_T("'%d', "), nID);
+		sql += cstrtmp;
+		// 获取name,必填
+		cstrtmp.Format(_T("'%s', "), A2W(m_sGuest.m_strName.c_str()));
+		sql += cstrtmp;
+		// 获取性别,必填
+		cstrtmp.Format(_T("'%s', "), A2W(m_sGuest.m_strSex.c_str()));
+		sql += cstrtmp;
+		// 获取年龄,选填
+		m_sGuest.m_strYearOld == "" ? cstrtmp = _T("NULL, ") : cstrtmp.Format(_T("'%s', "), A2W(m_sGuest.m_strYearOld.c_str()));
+		sql += cstrtmp;
+		// 获取证件类型,必填
+		cstrtmp.Format(_T("'%s', "), A2W(m_sGuest.m_strIDCardType.c_str()));
+		sql += cstrtmp;
+		// 获取证件编号,必填
+		cstrtmp.Format(_T("'%s', "), A2W(m_sGuest.m_strIDCardID.c_str()));
+		sql += cstrtmp;
+		// 获取联系电话,必填
+		cstrtmp.Format(_T("'%s', "), A2W(m_sGuest.m_strPhone.c_str()));
+		sql += cstrtmp;
+		// 获取联系地址,选填
+		m_sGuest.m_strAddress == "" ? cstrtmp = _T("NULL, ") : cstrtmp.Format(_T("'%s', "), A2W(m_sGuest.m_strAddress.c_str()));
+		sql += cstrtmp;
+		// 获取公司名称,选填
+		m_sGuest.m_strCompName == "" ? cstrtmp = _T("NULL, ") : cstrtmp.Format(_T("'%s', "), A2W(m_sGuest.m_strCompName.c_str()));
+		sql += cstrtmp;
+		// 获取公司地址,选填
+		m_sGuest.m_strCompAddr == "" ? cstrtmp = _T("NULL, ") : cstrtmp.Format(_T("'%s', "), A2W(m_sGuest.m_strCompAddr.c_str()));
+		sql += cstrtmp;
+		// 获取入住时间,必填
+		CTime tNow = CTime::GetCurrentTime();
+		cstrtmp.Format(_T("'%d-%d-%d %d:%d:%d', "), tNow.GetYear(), tNow.GetMonth(), tNow.GetDay(), tNow.GetHour(), tNow.GetMinute(), tNow.GetSecond());
+		sql += cstrtmp;
+		// 获取预计离店时间,必填
+		// 在这里考虑到一个客人可能预定多个房间,所以客人的预计离店时间为最长的那一个房间
+		int nStayDay{};
+		for (int i = 0; i < m_vecRoom.size(); i++)
+			if (m_vecRoom[i].m_stayDay > nStayDay)
+				nStayDay = m_vecRoom[i].m_stayDay;
+		tNow += CTimeSpan(nStayDay, 0, 0, 0);
+		cstrtmp.Format(_T("'%d-%d-%d %d:%d:%d', "), tNow.GetYear(), tNow.GetMonth(), tNow.GetDay(), tNow.GetHour(), tNow.GetMinute(), tNow.GetSecond());
+		sql += cstrtmp;
+		// 获取押金数目,必填
+		cstrtmp.Format(_T("'%.2lf')"), m_sGuest.m_dDeposit);
+		sql += cstrtmp;
+		if(g_mysql.excuteUpdate(sql) <= 0)
+		{
+			MessageBox(_T("数据库更新失败"), 0, MB_ICONERROR | MB_OK);
+			g_log.insertNewError(aduit::e_error, "CHotelSystemCheckinDlg::OnBnClickedButtonPayandsave()数据库更新失败-1", GetLastError());
+			return;
+		}
+
+		// 更新room表的房间信息
+		// 可能一个客户会订购多个房间
+		for (int i = 0; i < m_vecRoom.size(); i++)
+		{
+			sql = _T("");
+			sql.Format(_T("UPDATE room SET guestid=%d, dirty=0 WHERE id=%d"), nID, m_vecRoom[i].m_basicInfo.m_nRoomID);
+			if (g_mysql.excuteUpdate(sql) <= 0)
+			{
+				MessageBox(_T("数据库更新失败"), 0, MB_ICONERROR | MB_OK);
+				g_log.insertNewError(aduit::e_error, "CHotelSystemCheckinDlg::OnBnClickedButtonPayandsave()数据库更新失败-2", GetLastError());
+				return;
+			}
+		}
+		MessageBox(_T("信息保存成功"), 0, MB_ICONINFORMATION | MB_OK);
+		if(MessageBox(_T("是否关闭此窗口"),0,MB_ICONINFORMATION | MB_YESNO) == IDYES)
+		{
+			// 关闭窗口
+			this->DestroyWindow();
+			this->EndDialog(0);
+		}
+	}
+	catch (const sql::SQLException& e)
+	{
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		return;
+	}
 }

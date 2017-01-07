@@ -17,7 +17,6 @@ bool db::CMysql::initMysql()
 		g_log.insertNewError(aduit::e_info, info);
 		m_pStatement = m_pConn->createStatement();
 		m_pStatement->execute("set names 'GBK'");		// 设置数据库编码格式
-		m_pConn->setAutoCommit(0);
 	}
 	catch (sql::SQLException &e)
 	{
@@ -37,7 +36,7 @@ bool db::CMysql::initIsSuccess() const
 	return m_bInitSuccess;
 }
 
-// 执行SQL语句
+// 执行返回式SQL语句
 const sql::ResultSet* db::CMysql::excuteQuery(const char* __sql)
 {
 	try
@@ -52,14 +51,9 @@ const sql::ResultSet* db::CMysql::excuteQuery(const char* __sql)
 		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
 		return nullptr;
 	}
-	catch (const std::exception&e)
-	{
-		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
-		return nullptr;
-	}
 }
 
-// 执行SQL语句
+// 执行返回式SQL语句
 const sql::ResultSet* db::CMysql::excuteQuery(CString& __sql)
 {
 	USES_CONVERSION;
@@ -68,9 +62,45 @@ const sql::ResultSet* db::CMysql::excuteQuery(CString& __sql)
 	return excuteQuery(szQuery);
 }
 
+// 执行返回式SQL语句
 const sql::ResultSet* db::CMysql::excuteQuery(const std::string& __sql)
 {
 	return excuteQuery(__sql.c_str());
+}
+
+// 执行非返回式SQL语句
+int db::CMysql::excuteUpdate(const char* __sql)
+{
+	try
+	{
+		if (!m_bInitSuccess)
+			initMysql();
+		m_pConn->setAutoCommit(false);
+		int nRet = m_pStatement->executeUpdate(__sql);
+		m_pConn->commit();		// 提交SQL语句
+		m_pConn->setAutoCommit(true);
+		return nRet;
+	}
+	catch (const sql::SQLException &e)
+	{
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		return -1;
+	}
+}
+
+// 执行非返回式SQL语句
+int db::CMysql::excuteUpdate(CString& __sql)
+{
+	USES_CONVERSION;
+	char * szQuery = W2A(__sql.GetBuffer());
+	__sql.ReleaseBuffer();
+	return excuteUpdate(szQuery);
+}
+
+// 执行非返回式SQL语句
+int db::CMysql::excuteUpdate(const std::string& __sql)
+{
+	return excuteUpdate(__sql.c_str());
 }
 
 bool db::CMysql::resultNext()

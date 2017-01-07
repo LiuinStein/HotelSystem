@@ -27,6 +27,9 @@ namespace db
 		const sql::ResultSet * excuteQuery(const char * __sql);
 		const sql::ResultSet * excuteQuery(CString & __sql);
 		const sql::ResultSet * excuteQuery(const std::string & __sql);
+		int excuteUpdate(const char * __sql);
+		int excuteUpdate(CString & __sql);
+		int excuteUpdate(const std::string & __sql);
 		bool resultNext();
 		const sql::ResultSet * getResultSet()const;
 		template<typename T>
