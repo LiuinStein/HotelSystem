@@ -52,6 +52,7 @@ BEGIN_MESSAGE_MAP(CHotelSystemCheckinDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK_DISCOUNTED, &CHotelSystemCheckinDlg::OnBnClickedCheckDiscounted)
 	ON_CBN_SELCHANGE(IDC_COMBO_ROOMTYPE, &CHotelSystemCheckinDlg::OnSelchangeComboRoomtype)
 	ON_CBN_SELCHANGE(IDC_COMBO_FLOOR, &CHotelSystemCheckinDlg::OnSelchangeComboFloor)
+	ON_BN_CLICKED(IDC_BUTTON_APPENDROOM, &CHotelSystemCheckinDlg::OnBnClickedButtonAppendroom)
 END_MESSAGE_MAP()
 
 
@@ -69,8 +70,9 @@ BOOL CHotelSystemCheckinDlg::PreTranslateMessage(MSG* pMsg)
 BOOL CHotelSystemCheckinDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-
 	m_editPayDiscounted.EnableWindow(FALSE);
+	// 初始化气泡
+	EnableToolTips(TRUE);
 	// 性别下拉框
 	m_comboGuestSex.InsertString(0, _T("男"));
 	m_comboGuestSex.InsertString(1, _T("女"));
@@ -79,6 +81,11 @@ BOOL CHotelSystemCheckinDlg::OnInitDialog()
 	m_comboGuestIDCardType.InsertString(1, _T("军人证"));
 	m_comboGuestIDCardType.InsertString(2, _T("护照"));
 	m_comboGuestIDCardType.InsertString(3, _T("港澳同胞证"));
+	// 支付方式
+	m_comboPayMethod.InsertString(0, _T("现金"));
+	m_comboPayMethod.InsertString(1, _T("银行卡"));
+	m_comboPayMethod.InsertString(2, _T("支付宝"));
+	m_comboPayMethod.InsertString(3, _T("微信"));
 	// 获取房间类型
 	if(g_vecRoomType.size() == 0 && !data::GetAllRoomType())
 	{
@@ -160,4 +167,99 @@ void CHotelSystemCheckinDlg::OnSelchangeComboFloor()
 		tmp.Format(_T("%d"), vecRoomID[i]);
 		m_comboRoomNumber.InsertString(i, tmp);
 	}
+}
+
+// 追加房间按钮
+void CHotelSystemCheckinDlg::OnBnClickedButtonAppendroom()
+{
+	if(!GetInfoFromDlg())
+		return;
+
+}
+
+// 从界面获取信息
+bool CHotelSystemCheckinDlg::GetInfoFromDlg()
+{
+	// 先获取必需的宾客信息
+	if (!(
+		GetInfoFromEdit(m_editGuestName, m_sGuest.m_strName) &&	// 姓名
+		GetInfoFromCombo(m_comboGuestSex, m_sGuest.m_strSex) &&	// 性别
+		GetInfoFromCombo(m_comboGuestIDCardType, m_sGuest.m_strIDCardType) &&	// 证件类型
+		GetInfoFromEdit(m_editGuestIDCardID, m_sGuest.m_strIDCardID) &&	// 证件编号
+		GetInfoFromEdit(m_editGuestPhone, m_sGuest.m_strPhone)	// 联系电话
+		))
+		return false;
+	// 获取非必需的宾客信息
+	GetInfoFromEdit(m_editGuestYearOld, m_sGuest.m_strYearOld);	// 年龄
+	GetInfoFromEdit(m_editGuestAddr, m_sGuest.m_strAddress);	// 联系地址
+	GetInfoFromEdit(m_editGuestCompName, m_sGuest.m_strCompName);	// 公司名
+	GetInfoFromEdit(m_editGuestCompAddr, m_sGuest.m_strCompAddr);	// 公司地址
+
+	// 获取房间信息(全部必需)
+	SRoomInfo tmp;
+	tmp.m_basicInfo.m_nTypeID = m_comboRoomNumber.GetCurSel() + 1;
+	tmp.m_basicInfo.m_nIsDirty = false;	// 新房默认干净
+	std::string tmpstr;
+	// 获取房间号
+	if (!GetInfoFromCombo(m_comboRoomNumber, tmpstr))
+		return false;
+	tmp.m_basicInfo.m_nRoomID = atoi(tmpstr.c_str());
+	// 获取预留时间
+	if (!GetInfoFromEdit(m_editStayTime, tmpstr))
+		return false;
+	tmp.m_stayDay = atoi(tmpstr.c_str());
+	// 获取折扣
+	if (m_bIsDiscounted)
+	{
+		if (!GetInfoFromEdit(m_editPayDiscounted, tmpstr))
+			return false;
+		tmp.m_despoit = double(atoi(tmpstr.c_str())) / 10.0;
+	}
+	else
+		tmp.m_despoit = 1;
+	// 从数据库获取房间原价
+	std::string sql("SELECT price FROM room_type WHERE id=");
+	sql += char(tmp.m_basicInfo.m_nTypeID + '0');
+	try
+	{
+		g_mysql.excuteQuery(sql);
+		if (g_mysql.resultNext())
+			tmp.m_prePay = g_mysql.getResultSet()->getDouble("price");
+	}
+	catch (const sql::SQLException & e)
+	{
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		return false;
+	}
+	tmp.m_basicInfo.m_nGuestID = 0;
+	m_vecRoom.push_back(tmp);
+}
+
+// 从编辑框从获取信息
+bool CHotelSystemCheckinDlg::GetInfoFromEdit(CEdit& __from, std::string & __info, bool __isnessary)
+{
+	CString tmp;
+	__from.GetWindowTextW(tmp);
+	if (__isnessary && tmp == _T(""))
+	{
+		__from.ShowBalloonTip(_T("提示"), _T("请填写此字段"), TTI_INFO);
+		return false;
+	}
+	USES_CONVERSION;
+	__info = W2A(tmp.GetBuffer());
+	tmp.ReleaseBuffer();
+	return true;
+}
+
+// 获取选中的编辑框的信息
+bool CHotelSystemCheckinDlg::GetInfoFromCombo(CComboBox& __from, std::string& __info, bool __isnessary)
+{
+	CString tmp;
+	__from.GetLBText(__from.GetCurSel(), tmp);
+	if(__isnessary && tmp == _T(""))
+		return false;
+	USES_CONVERSION;
+	__info = W2A(tmp.GetBuffer());
+	tmp.ReleaseBuffer();
+	return true;
 }

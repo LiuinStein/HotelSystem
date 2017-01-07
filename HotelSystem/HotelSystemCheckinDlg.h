@@ -1,6 +1,7 @@
 #pragma once
 #include "afxwin.h"
 #include "afxcmn.h"
+#include "DataStruct.h"
 
 
 // CHotelSystemCheckinDlg dialog
@@ -27,7 +28,21 @@ public:
 	virtual BOOL OnInitDialog();
 
 	afx_msg void OnBnClickedCheckDiscounted();
+	afx_msg void OnSelchangeComboRoomtype();
+	afx_msg void OnSelchangeComboFloor();
+	afx_msg void OnBnClickedButtonAppendroom();
 
+	bool GetInfoFromDlg();
+	bool GetInfoFromEdit(CEdit & __from, std::string & __info, bool __isnessary = true);
+	bool GetInfoFromCombo(CComboBox & __from, std::string & __info, bool __isnessary = true);
+
+	struct SRoomInfo
+	{
+		data::SRoom m_basicInfo;
+		UINT m_stayDay;
+		double m_prePay;	// 从数据库中获取的原价
+		double m_despoit;	// 折扣信息
+	};
 
 	CEdit m_editGuestName;
 	CComboBox m_comboGuestSex;
@@ -50,6 +65,7 @@ public:
 	CComboBox m_comboPayMethod;
 	CListCtrl m_listAccount;
 	bool m_bIsDiscounted;
-	afx_msg void OnSelchangeComboRoomtype();
-	afx_msg void OnSelchangeComboFloor();
+	data::SGuest m_sGuest;
+	stl::CVector<SRoomInfo> m_vecRoom;
+
 };

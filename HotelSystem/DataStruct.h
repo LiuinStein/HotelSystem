@@ -2,10 +2,12 @@
 #ifndef __DATA_STRUCT_H_
 #define __DATA_STRUCT_H_
 #include "Vector.h"
+#include <string>
 
 namespace data
 {
 	typedef std::string VARCHAR;
+	typedef std::string DATATIME;
 	typedef double DECIMAL;
 	typedef unsigned char BIT;
 
@@ -34,6 +36,23 @@ namespace data
 	bool GetAllRoom();
 	// 获取所有可用房间
 	bool GetAvailableRoom();
+
+	struct SGuest
+	{
+		int m_nID;
+		VARCHAR m_strName;
+		VARCHAR m_strSex;
+		VARCHAR m_strYearOld;
+		VARCHAR m_strIDCardType;
+		VARCHAR m_strIDCardID;
+		VARCHAR m_strPhone;
+		VARCHAR m_strAddress;
+		VARCHAR m_strCompName;
+		VARCHAR m_strCompAddr;
+		DATATIME m_tInTime;
+		DATATIME m_tOutTime;
+		DECIMAL m_dDeposit;
+	};
 
 }
 
