@@ -432,7 +432,10 @@ void CHotelSystemCheckinDlg::OnBnClickedButtonPayandsave()
 		sql += cstrtmp;
 		// 获取入住时间,必填
 		CTime tNow = CTime::GetCurrentTime();
-		cstrtmp.Format(_T("'%d-%d-%d %d:%d:%d', "), tNow.GetYear(), tNow.GetMonth(), tNow.GetDay(), tNow.GetHour(), tNow.GetMinute(), tNow.GetSecond());
+		CString cstrTime;
+		cstrTime.Format(_T("%d-%d-%d %d:%d:%d"), tNow.GetYear(), tNow.GetMonth(), tNow.GetDay(), tNow.GetHour(), tNow.GetMinute(), tNow.GetSecond());
+		CString cstrNowTime(cstrTime);
+		cstrtmp.Format(_T("'%s', "), cstrTime.GetBuffer());
 		sql += cstrtmp;
 		// 获取预计离店时间,必填
 		// 在这里考虑到一个客人可能预定多个房间,所以客人的预计离店时间为最长的那一个房间
@@ -440,8 +443,10 @@ void CHotelSystemCheckinDlg::OnBnClickedButtonPayandsave()
 		for (int i = 0; i < m_vecRoom.size(); i++)
 			if (m_vecRoom[i].m_stayDay > nStayDay)
 				nStayDay = m_vecRoom[i].m_stayDay;
+		// 计算并累加时间差
 		tNow += CTimeSpan(nStayDay, 0, 0, 0);
-		cstrtmp.Format(_T("'%d-%d-%d %d:%d:%d', "), tNow.GetYear(), tNow.GetMonth(), tNow.GetDay(), tNow.GetHour(), tNow.GetMinute(), tNow.GetSecond());
+		cstrTime.Format(_T("%d-%d-%d %d:%d:%d"), tNow.GetYear(), tNow.GetMonth(), tNow.GetDay(), tNow.GetHour(), tNow.GetMinute(), tNow.GetSecond());
+		cstrtmp.Format(_T("'%s', "), cstrTime.GetBuffer());
 		sql += cstrtmp;
 		// 获取押金数目,必填
 		cstrtmp.Format(_T("'%.2lf')"), m_sGuest.m_dDeposit);
@@ -458,7 +463,9 @@ void CHotelSystemCheckinDlg::OnBnClickedButtonPayandsave()
 		for (int i = 0; i < m_vecRoom.size(); i++)
 		{
 			sql = _T("");
-			sql.Format(_T("UPDATE room SET guestid=%d, dirty=0 WHERE id=%d"), nID, m_vecRoom[i].m_basicInfo.m_nRoomID);
+			sql.Format(_T("UPDATE room SET guestid=%d, dirty=0, checkintime='%s', checkouttime='%s', unitprice='%s' WHERE id=%d"), 
+				nID, cstrNowTime.GetBuffer(), cstrTime.GetBuffer(), m_vecRoom[i].m_cstrPrice.GetBuffer(), m_vecRoom[i].m_basicInfo.m_nRoomID);
+			m_vecRoom[i].m_cstrPrice.ReleaseBuffer();
 			if (g_mysql.excuteUpdate(sql) <= 0)
 			{
 				MessageBox(_T("数据库更新失败"), 0, MB_ICONERROR | MB_OK);
@@ -466,6 +473,10 @@ void CHotelSystemCheckinDlg::OnBnClickedButtonPayandsave()
 				return;
 			}
 		}
+		// 释放CString缓冲区
+		cstrTime.ReleaseBuffer();
+		cstrNowTime.ReleaseBuffer();
+		// 提示并进行下一步操作
 		MessageBox(_T("信息保存成功"), 0, MB_ICONINFORMATION | MB_OK);
 		if(MessageBox(_T("是否关闭此窗口"),0,MB_ICONINFORMATION | MB_YESNO) == IDYES)
 		{
@@ -477,6 +488,5 @@ void CHotelSystemCheckinDlg::OnBnClickedButtonPayandsave()
 	catch (const sql::SQLException& e)
 	{
 		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
-		return;
 	}
 }

@@ -17,7 +17,5 @@ extern stl::CVector<data::SRoom> g_vecAllRoom;
 extern stl::CVector<data::SRoom> g_vecAvailableRoom;
 // 所有的物品信息,定义于DataStruct.cpp
 extern stl::CVector<data::SItem> g_vecAllItem;
-// typeid对房间类型名映射关系
-extern std::map<int, data::VARCHAR> g_mapRoomType;
 
 #endif // !__GLOBAL_VARIABLE_H_

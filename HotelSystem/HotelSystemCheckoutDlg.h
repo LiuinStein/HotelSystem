@@ -1,6 +1,7 @@
 #pragma once
 #include "afxwin.h"
 #include "afxcmn.h"
+#include "DataStruct.h"
 
 
 // CHotelSystemCheckoutDlg dialog
@@ -31,8 +32,22 @@ public:
 	afx_msg void OnBnClickedRadio1();
 	afx_msg void OnBnClickedRadio2();
 
+	bool SearchByRoomID();
+	bool SearchByGuestName();
+	bool GetRoomInfoByGuestID();
+
+	struct SRoomEx
+	{
+		data::SRoom m_basic;
+		int m_nRemaining;
+		double m_dRefund;
+	};
+
 	CEdit m_editRoomID;
 	CEdit m_editGuestName;
 	CListCtrl m_listInfo;
 	bool m_bUseRoomID;
+	stl::CVector<SRoomEx> m_vecRoom;
+	int m_nGuestID;
+
 };

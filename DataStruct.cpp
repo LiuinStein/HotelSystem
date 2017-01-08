@@ -9,8 +9,6 @@ stl::CVector<data::SRoom> g_vecAllRoom;
 stl::CVector<data::SRoom> g_vecAvailableRoom;
 // 所有的物品信息
 stl::CVector<data::SItem> g_vecAllItem;
-// typeid对房间类型名映射
-std::map<int, data::VARCHAR> g_mapRoomType;
 
 bool data::GetGetRoomTypeByCondition(stl::CVector<SRoomType>& __store, const char* __con)
 {
@@ -58,9 +56,6 @@ bool data::GetRoomByCondition(stl::CVector<SRoom>& __store, const char* __con)
 			tmp.m_nTypeID = g_mysql.getResultSet()->getInt("typeid");
 			tmp.m_nGuestID = g_mysql.getResultSet()->getInt("guestid");
 			tmp.m_nIsDirty = g_mysql.getResultSet()->getBoolean("dirty");
-			tmp.m_tCheckinTime = g_mysql.getResultSet()->getString("checkintime");
-			tmp.m_tCheckoutTime = g_mysql.getResultSet()->getString("checkouttime");
-			tmp.m_dUnitPrice = g_mysql.getResultSet()->getDouble("unitprice");
 			__store.push_back(tmp);
 		}
 	}
@@ -112,21 +107,4 @@ bool data::GetItemByCondition(stl::CVector<SItem>& __store, const char* __con)
 bool data::GetAllItem()
 {
 	return GetItemByCondition(g_vecAllItem);
-}
-
-bool data::GetRoomTypeMap()
-{
-	std::string sql("SELECT id,name FROM room_type");
-	try
-	{
-		g_mysql.excuteQuery(sql);
-		while (g_mysql.resultNext())
-			g_mapRoomType[g_mysql.getResultSet()->getInt("id")] = g_mysql.getResultSet()->getString("name");
-	}
-	catch (const sql::SQLException& e)
-	{
-		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
-		return false;
-	}
-	return true;
 }

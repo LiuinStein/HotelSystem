@@ -3,7 +3,6 @@
 #define __DATA_STRUCT_H_
 #include "Vector.h"
 #include <string>
-#include <map>
 
 namespace data
 {
@@ -30,9 +29,6 @@ namespace data
 		int m_nTypeID;
 		int m_nGuestID;
 		bool m_nIsDirty;
-		DATATIME m_tCheckinTime;
-		DATATIME m_tCheckoutTime;
-		DECIMAL m_dUnitPrice;
 	};
 	// 依据条件获取房间,默认输出全部房间
 	bool GetRoomByCondition(stl::CVector<SRoom> & __store, const char * __con = "1=1");
@@ -70,9 +66,6 @@ namespace data
 	bool GetItemByCondition(stl::CVector<SItem> & __store, const char * __con = "1=1");
 	// 获取所有的Item
 	bool GetAllItem();
-
-	// 获取typeid对房间类型名映射关系
-	bool GetRoomTypeMap();
 
 }
 
