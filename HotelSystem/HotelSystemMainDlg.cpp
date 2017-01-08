@@ -5,6 +5,7 @@
 #include "HotelSystem.h"
 #include "HotelSystemMainDlg.h"
 #include "HotelSystemCheckinDlg.h"
+#include "HotelSystemCheckoutDlg.h"
 #include "afxdialogex.h"
 #include "GlobalVariable.h"
 
@@ -44,6 +45,7 @@ BEGIN_MESSAGE_MAP(CHotelSystemMainDlg, CDialogEx)
 	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_BUTTON_REFRESH, &CHotelSystemMainDlg::OnBnClickedButtonRefresh)
 	ON_BN_CLICKED(IDC_BUTTON_CHECKIN, &CHotelSystemMainDlg::OnBnClickedButtonCheckin)
+	ON_BN_CLICKED(IDC_BUTTON_CHECKOUT, &CHotelSystemMainDlg::OnBnClickedButtonCheckout)
 END_MESSAGE_MAP()
 
 
@@ -90,5 +92,12 @@ void CHotelSystemMainDlg::OnBnClickedButtonRefresh()
 void CHotelSystemMainDlg::OnBnClickedButtonCheckin()
 {
 	CHotelSystemCheckinDlg dlg;
+	dlg.DoModal();
+}
+
+
+void CHotelSystemMainDlg::OnBnClickedButtonCheckout()
+{
+	CHotelSystemCheckoutDlg dlg;
 	dlg.DoModal();
 }

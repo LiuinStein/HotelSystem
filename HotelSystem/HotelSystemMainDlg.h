@@ -27,8 +27,12 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	CListCtrl m_listSplash;
+
 	afx_msg void OnClose();
 	afx_msg void OnBnClickedButtonRefresh();
 	afx_msg void OnBnClickedButtonCheckin();
+	afx_msg void OnBnClickedButtonCheckout();
+
+	CListCtrl m_listSplash;
+
 };

@@ -396,7 +396,7 @@ void CHotelSystemCheckinDlg::OnBnClickedButtonPayandsave()
 		CString sql{ "INSERT INTO `guest` VALUES (" };
 		CString cstrtmp;
 		// ªÒ»°id
-		std::string sqltmp{ "SELECT COUNT(*) AS id FROM guest" };
+		std::string sqltmp{ "SELECT MAX(id)+1 AS id FROM guest" };
 		g_mysql.excuteQuery(sqltmp);
 		int nID{};
 		if (g_mysql.resultNext())

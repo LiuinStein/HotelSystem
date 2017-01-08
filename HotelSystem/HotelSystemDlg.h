@@ -34,8 +34,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	CEdit m_editUsername;
-	CEdit m_editPassword;
+	
 	afx_msg void OnBnClickedButtonClear();
 	afx_msg void OnBnClickedButtonLogin();
+
+	CEdit m_editUsername;
+	CEdit m_editPassword;
 };
