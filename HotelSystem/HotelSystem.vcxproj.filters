@@ -57,6 +57,9 @@
     <ClInclude Include="HotelSystemCheckoutDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HotelSystemSearchGuestDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HotelSystem.cpp">
@@ -84,6 +87,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HotelSystemCheckoutDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HotelSystemSearchGuestDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

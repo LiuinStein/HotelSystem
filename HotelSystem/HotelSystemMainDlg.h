@@ -35,4 +35,5 @@ public:
 
 	CListCtrl m_listSplash;
 
+	afx_msg void OnBnClickedButtonSearchguest();
 };

@@ -202,6 +202,7 @@
     <ClInclude Include="HotelSystemCheckoutDlg.h" />
     <ClInclude Include="HotelSystemDlg.h" />
     <ClInclude Include="HotelSystemMainDlg.h" />
+    <ClInclude Include="HotelSystemSearchGuestDlg.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="mysql_conn.h" />
     <ClInclude Include="Resource.h" />
@@ -216,6 +217,7 @@
     <ClCompile Include="HotelSystemCheckoutDlg.cpp" />
     <ClCompile Include="HotelSystemDlg.cpp" />
     <ClCompile Include="HotelSystemMainDlg.cpp" />
+    <ClCompile Include="HotelSystemSearchGuestDlg.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="mysql_conn.cpp" />
     <ClCompile Include="stdafx.cpp">

@@ -6,6 +6,7 @@
 #include "HotelSystemMainDlg.h"
 #include "HotelSystemCheckinDlg.h"
 #include "HotelSystemCheckoutDlg.h"
+#include "HotelSystemSearchGuestDlg.h"
 #include "afxdialogex.h"
 #include "GlobalVariable.h"
 
@@ -46,6 +47,7 @@ BEGIN_MESSAGE_MAP(CHotelSystemMainDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_REFRESH, &CHotelSystemMainDlg::OnBnClickedButtonRefresh)
 	ON_BN_CLICKED(IDC_BUTTON_CHECKIN, &CHotelSystemMainDlg::OnBnClickedButtonCheckin)
 	ON_BN_CLICKED(IDC_BUTTON_CHECKOUT, &CHotelSystemMainDlg::OnBnClickedButtonCheckout)
+	ON_BN_CLICKED(IDC_BUTTON_SEARCHGUEST, &CHotelSystemMainDlg::OnBnClickedButtonSearchguest)
 END_MESSAGE_MAP()
 
 
@@ -99,5 +101,12 @@ void CHotelSystemMainDlg::OnBnClickedButtonCheckin()
 void CHotelSystemMainDlg::OnBnClickedButtonCheckout()
 {
 	CHotelSystemCheckoutDlg dlg;
+	dlg.DoModal();
+}
+
+// 客人信息按钮点击事件响应
+void CHotelSystemMainDlg::OnBnClickedButtonSearchguest()
+{
+	CHotelSystemSearchGuestDlg dlg;
 	dlg.DoModal();
 }
