@@ -31,10 +31,12 @@ public:
 	afx_msg void OnBnClickedButtonIndex();
 	afx_msg void OnBnClickedRadio1();
 	afx_msg void OnBnClickedRadio2();
+	afx_msg void OnBnClickedButtonCheckout();
 
 	bool SearchByRoomID();
 	bool SearchByGuestName();
 	bool GetRoomInfoByGuestID();
+	bool GetDepositByGuestID();
 
 	struct SRoomEx
 	{
@@ -49,5 +51,6 @@ public:
 	bool m_bUseRoomID;
 	stl::CVector<SRoomEx> m_vecRoom;
 	int m_nGuestID;
+	double m_dDeposit;
 
 };

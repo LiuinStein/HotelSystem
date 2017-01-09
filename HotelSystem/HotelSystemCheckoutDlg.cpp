@@ -14,6 +14,7 @@ IMPLEMENT_DYNAMIC(CHotelSystemCheckoutDlg, CDialogEx)
 
 CHotelSystemCheckoutDlg::CHotelSystemCheckoutDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_DIALOG_CHECKOUT, pParent), m_bUseRoomID(true), m_nGuestID(-1)
+	,  m_dDeposit(-1)
 {
 
 }
@@ -36,6 +37,7 @@ BEGIN_MESSAGE_MAP(CHotelSystemCheckoutDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_INDEX, &CHotelSystemCheckoutDlg::OnBnClickedButtonIndex)
 	ON_BN_CLICKED(IDC_RADIO1, &CHotelSystemCheckoutDlg::OnBnClickedRadio1)
 	ON_BN_CLICKED(IDC_RADIO2, &CHotelSystemCheckoutDlg::OnBnClickedRadio2)
+	ON_BN_CLICKED(IDC_BUTTON_CHECKOUT, &CHotelSystemCheckoutDlg::OnBnClickedButtonCheckout)
 END_MESSAGE_MAP()
 
 
@@ -124,7 +126,7 @@ bool CHotelSystemCheckoutDlg::SearchByRoomID()
 		if(!g_mysql.resultNext() || 0>= (m_nGuestID = g_mysql.getResultSet()->getInt("guestid")))
 			return false;
 		// 依据guestid获取房间信息
-		return GetRoomInfoByGuestID();
+		return GetRoomInfoByGuestID() && GetDepositByGuestID();
 	}
 	catch (const sql::SQLException& e)
 	{
@@ -164,7 +166,7 @@ bool CHotelSystemCheckoutDlg::SearchByGuestName()
 		// 释放缓冲区
 		inpGuestName.ReleaseBuffer();
 		// 依据guestid从room表中获取房间信息
-		return GetRoomInfoByGuestID();
+		return GetRoomInfoByGuestID() && GetDepositByGuestID();
 	}
 	catch (const sql::SQLException& e)
 	{
@@ -211,6 +213,25 @@ bool CHotelSystemCheckoutDlg::GetRoomInfoByGuestID()
 	return true;
 }
 
+// 依据guestid从guest表中获取押金信息
+bool CHotelSystemCheckoutDlg::GetDepositByGuestID()
+{
+	CString sql;
+	sql.Format(_T("SELECT deposit FROM guest WHERE id=%d"), m_nGuestID);
+	try
+	{
+		g_mysql.excuteQuery(sql);
+		m_dDeposit = g_mysql.resultNext() ?
+			g_mysql.getResultSet()->getDouble("deposit") : -1;
+	}
+	catch (const sql::SQLException& e)
+	{
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		return false;
+	}
+	return true;
+}
+
 
 BOOL CHotelSystemCheckoutDlg::OnInitDialog()
 {
@@ -228,4 +249,48 @@ BOOL CHotelSystemCheckoutDlg::OnInitDialog()
 	(static_cast<CButton*>(GetDlgItem(IDC_RADIO1)))->SetCheck(TRUE);
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+// 确认离店按钮事件响应
+void CHotelSystemCheckoutDlg::OnBnClickedButtonCheckout()
+{
+	// 确认离店之后应当先退还押金及其他费用
+	double dRefund{};
+	for (int i = 0; i < m_vecRoom.size(); i++)
+		dRefund += m_vecRoom[i].m_dRefund;
+	CString cstrShow;
+	cstrShow.Format(_T("现在退房将退还押金%.2lf元,房间费用%.2lf元,合计%.2lf元,你确定吗?"), m_dDeposit, dRefund, m_dDeposit + dRefund);
+	if (IDNO == MessageBox(cstrShow, 0, MB_ICONINFORMATION | MB_YESNO))
+		return;
+	try
+	{
+		// 更新room表中的房间信息
+		CString sql;
+		sql.Format(_T("UPDATE room SET guestid=0,dirty=0,checkintime=NULL,checkouttime=NULL,unitprice=0 WHERE guestid=%d"), m_nGuestID);
+		if (g_mysql.excuteUpdate(sql) <= 0)
+		{
+			MessageBox(_T("数据库更新失败"), 0, MB_ICONERROR | MB_OK);
+			g_log.insertNewError(aduit::e_error, "CHotelSystemCheckoutDlg::OnBnClickedButtonCheckout()数据库更新失败", GetLastError());
+			return;
+		}
+		// 删除guest表中的宾客记录
+		sql.Format(_T("DELETE FROM guest WHERE id=%d"), m_nGuestID);
+		if (g_mysql.excuteUpdate(sql) <= 0)
+		{
+			MessageBox(_T("数据库更新失败"), 0, MB_ICONERROR | MB_OK);
+			g_log.insertNewError(aduit::e_error, "CHotelSystemCheckoutDlg::OnBnClickedButtonCheckout()数据库更新失败", GetLastError());
+		}
+		// 提示信息
+		MessageBox(_T("确认离店成功"), 0, MB_ICONINFORMATION | MB_OK);
+		if (MessageBox(_T("是否关闭此窗口"), 0, MB_ICONINFORMATION | MB_YESNO) == IDYES)
+		{
+			// 关闭窗口
+			this->DestroyWindow();
+			this->EndDialog(0);
+		}
+	}
+	catch (const sql::SQLException& e)
+	{
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
+	}
 }
