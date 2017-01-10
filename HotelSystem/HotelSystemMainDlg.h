@@ -36,6 +36,12 @@ public:
 	afx_msg void OnBnClickedButtonCheckout();
 	afx_msg void OnBnClickedButtonSearchguest();
 	afx_msg void OnBnClickedButtonExpense();
+	afx_msg void OnBnClickedButtonAbout();
+	afx_msg void OnRclickListSplash(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void SetRoomClear();
+	afx_msg void SetRoomDirty();
+
+	void SetRoomDirtyCondition(bool __isdirty);
 
 	struct SSplashShow
 	{
@@ -50,6 +56,6 @@ public:
 
 	CListCtrl m_listSplash;
 	stl::CVector<SSplashShow> m_vecSplashRoom;
+	int m_nCilckListLine;
 
-	afx_msg void OnBnClickedButtonAbout();
 };

@@ -439,7 +439,7 @@ void CHotelSystemCheckinDlg::OnBnClickedButtonPayandsave()
 		sql += cstrtmp;
 		// 获取预计离店时间,必填
 		// 在这里考虑到一个客人可能预定多个房间,所以客人的预计离店时间为最长的那一个房间
-		int nStayDay{};
+		UINT nStayDay{};
 		for (int i = 0; i < m_vecRoom.size(); i++)
 			if (m_vecRoom[i].m_stayDay > nStayDay)
 				nStayDay = m_vecRoom[i].m_stayDay;

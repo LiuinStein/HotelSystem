@@ -88,7 +88,7 @@ void CHotelSystemMainDlg::RefreshList()
 }
 
 CHotelSystemMainDlg::CHotelSystemMainDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(IDD_DIALOG_MAIN, pParent)
+	: CDialogEx(IDD_DIALOG_MAIN, pParent), m_nCilckListLine(-1)
 {
 
 }
@@ -112,6 +112,9 @@ BEGIN_MESSAGE_MAP(CHotelSystemMainDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_SEARCHGUEST, &CHotelSystemMainDlg::OnBnClickedButtonSearchguest)
 	ON_BN_CLICKED(IDC_BUTTON_EXPENSE, &CHotelSystemMainDlg::OnBnClickedButtonExpense)
 	ON_BN_CLICKED(IDC_BUTTON_ABOUT, &CHotelSystemMainDlg::OnBnClickedButtonAbout)
+	ON_NOTIFY(NM_RCLICK, IDC_LIST_SPLASH, &CHotelSystemMainDlg::OnRclickListSplash)
+	ON_COMMAND(ID__32773, &CHotelSystemMainDlg::SetRoomClear)
+	ON_COMMAND(ID__32772, &CHotelSystemMainDlg::SetRoomDirty)
 END_MESSAGE_MAP()
 
 
@@ -125,7 +128,7 @@ BOOL CHotelSystemMainDlg::OnInitDialog()
 	// 设置list样式
 	m_listSplash.SetExtendedStyle(m_listSplash.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	// 插入列
-	m_listSplash.InsertColumn(0, _T("房间号"), LVCFMT_CENTER, 140, 50);
+	m_listSplash.InsertColumn(0, _T("房间号"), LVCFMT_CENTER, 100, 50);
 	m_listSplash.InsertColumn(1, _T("房间类型"), LVCFMT_CENTER, 140, 50);
 	m_listSplash.InsertColumn(2, _T("售出时单价"), LVCFMT_CENTER, 140, 50);
 	m_listSplash.InsertColumn(3, _T("清洁状态"), LVCFMT_CENTER, 140, 50);
@@ -190,4 +193,82 @@ void CHotelSystemMainDlg::OnBnClickedButtonAbout()
 {
 	CHotelSystemAboutDlg dlg;
 	dlg.DoModal();
+}
+
+// 右键list框弹出清洁状态菜单
+void CHotelSystemMainDlg::OnRclickListSplash(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	NM_LISTVIEW * pNMListView = reinterpret_cast<NM_LISTVIEW*>(pNMHDR);
+	m_nCilckListLine = pNMListView->iItem;	// 获取选中行信息
+	//如果当前没有选中的行，右键菜单不显示
+	POSITION pos = m_listSplash.GetFirstSelectedItemPosition();
+	if (m_listSplash.GetNextSelectedItem(pos) == -1)
+		return;		//如果没有选中的项目，返回
+
+	//显示弹出菜单
+	CPoint point;
+	GetCursorPos(&point);
+	CMenu menu;
+	menu.LoadMenu(IDR_MENU1);//获取菜单的资源
+	CMenu* popup = menu.GetSubMenu(0);//只获取第一个列菜单的指针
+	//弹出菜单显示
+	popup->TrackPopupMenu(TPM_RIGHTBUTTON | TPM_LEFTALIGN, point.x, point.y, this);
+	*pResult = 0;
+}
+
+// 设置房屋整洁
+void CHotelSystemMainDlg::SetRoomClear()
+{
+	SetRoomDirtyCondition(false);
+}
+
+// 设置房屋需要打扫
+void CHotelSystemMainDlg::SetRoomDirty()
+{
+	SetRoomDirtyCondition(true);
+}
+
+// 设置房屋的清洁状态
+void CHotelSystemMainDlg::SetRoomDirtyCondition(bool __isdirty)
+{
+	// 首先获取房间ID
+	if (m_nCilckListLine == -1)
+		return;
+	CString cstrSelectRoomID = m_listSplash.GetItemText(m_nCilckListLine, 0);
+	if (cstrSelectRoomID == _T(""))
+		return;
+	int nRoomID{ _ttoi(cstrSelectRoomID) };
+	// 在vector中查找这个房间
+	int nRankRoomID{};
+	for (int i = 0; i < m_vecSplashRoom.size(); i++)
+		if (m_vecSplashRoom[i].m_nRoomID == nRoomID)
+		{
+			nRankRoomID = i;
+			break;
+		}
+	// 清洁状态一致的话就不用修改了
+	if (m_vecSplashRoom[nRankRoomID].m_bIsDirty == __isdirty)
+		return;
+	// 不一致的情况
+	m_vecSplashRoom[nRankRoomID].m_bIsDirty = __isdirty;
+	// 更新至数据库
+	int nDirty{ __isdirty ? 1 : 0 };
+	CString sql;
+	sql.Format(_T("UPDATE room SET dirty=%d WHERE id=%d"), nDirty, m_vecSplashRoom[nRankRoomID].m_nRoomID);
+	try
+	{
+		if (g_mysql.excuteUpdate(sql) <= 0)
+		{
+			MessageBox(_T("信息未能成功更新至数据库"), 0, MB_ICONERROR | MB_OK);
+			return;
+		}
+	}
+	catch (const sql::SQLException &e)
+	{
+		MessageBox(_T("信息未能成功更新至数据库"), 0, MB_ICONERROR | MB_OK);
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
+	}
+	RefreshList();
+	m_nCilckListLine = -1;
 }
