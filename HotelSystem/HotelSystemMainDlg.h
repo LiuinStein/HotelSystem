@@ -1,5 +1,7 @@
 #pragma once
 #include "afxcmn.h"
+#include <string>
+#include "Vector.h"
 
 
 // CHotelSystemMainDlg dialog
@@ -9,7 +11,7 @@ class CHotelSystemMainDlg : public CDialogEx
 	DECLARE_DYNAMIC(CHotelSystemMainDlg)
 
 	// Ë¢ÐÂÁÐ±í
-	void refreshList();
+	void RefreshList();
 
 public:
 	CHotelSystemMainDlg(CWnd* pParent = NULL);   // standard constructor
@@ -32,9 +34,21 @@ public:
 	afx_msg void OnBnClickedButtonRefresh();
 	afx_msg void OnBnClickedButtonCheckin();
 	afx_msg void OnBnClickedButtonCheckout();
-
-	CListCtrl m_listSplash;
-
 	afx_msg void OnBnClickedButtonSearchguest();
 	afx_msg void OnBnClickedButtonExpense();
+
+	struct SSplashShow
+	{
+		int m_nRoomID;
+		int m_nTypeID;
+		int m_nGuestID;
+		double m_dPrice;
+		bool m_bIsDirty;
+		std::string m_strGuestName;
+		std::string m_strCheckoutTime;
+	};
+
+	CListCtrl m_listSplash;
+	stl::CVector<SSplashShow> m_vecSplashRoom;
+
 };
