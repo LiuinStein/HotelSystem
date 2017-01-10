@@ -8,6 +8,7 @@
 #include "HotelSystemCheckoutDlg.h"
 #include "HotelSystemSearchGuestDlg.h"
 #include "HotelSystemAboutDlg.h"
+#include "HotelSystemRoomPropretiesDlg.h"
 #include "HotelSystemExpense.h"
 #include "afxdialogex.h"
 #include "GlobalVariable.h"
@@ -115,6 +116,10 @@ BEGIN_MESSAGE_MAP(CHotelSystemMainDlg, CDialogEx)
 	ON_NOTIFY(NM_RCLICK, IDC_LIST_SPLASH, &CHotelSystemMainDlg::OnRclickListSplash)
 	ON_COMMAND(ID__32773, &CHotelSystemMainDlg::SetRoomClear)
 	ON_COMMAND(ID__32772, &CHotelSystemMainDlg::SetRoomDirty)
+	ON_WM_TIMER()
+	ON_COMMAND(ID_32775, &CHotelSystemMainDlg::AddNewRoom)
+	ON_COMMAND(ID_32776, &CHotelSystemMainDlg::ChangeRoomType)
+	ON_COMMAND(ID_32777, &CHotelSystemMainDlg::DeleteRoom)
 END_MESSAGE_MAP()
 
 
@@ -124,7 +129,6 @@ END_MESSAGE_MAP()
 BOOL CHotelSystemMainDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-
 	// 设置list样式
 	m_listSplash.SetExtendedStyle(m_listSplash.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	// 插入列
@@ -136,6 +140,8 @@ BOOL CHotelSystemMainDlg::OnInitDialog()
 	m_listSplash.InsertColumn(5, _T("离店时间"), LVCFMT_CENTER, 160, 50);
 	// 刷新列表
 	RefreshList();
+	// 设置计时器每隔5分钟更新一次
+	SetTimer(1, 5 * 60 * 1000, NULL);
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -160,14 +166,14 @@ void CHotelSystemMainDlg::OnBnClickedButtonRefresh()
 	RefreshList();
 }
 
-
+// 登记入住按钮点击事件响应
 void CHotelSystemMainDlg::OnBnClickedButtonCheckin()
 {
 	CHotelSystemCheckinDlg dlg;
 	dlg.DoModal();
 }
 
-
+// 结账离店按钮点击事件响应
 void CHotelSystemMainDlg::OnBnClickedButtonCheckout()
 {
 	CHotelSystemCheckoutDlg dlg;
@@ -271,4 +277,96 @@ void CHotelSystemMainDlg::SetRoomDirtyCondition(bool __isdirty)
 	}
 	RefreshList();
 	m_nCilckListLine = -1;
+}
+
+// 计时器每隔5分钟更新一次列表
+void CHotelSystemMainDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	RefreshList();
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+// 添加新房
+void CHotelSystemMainDlg::AddNewRoom()
+{
+	CHotelSystemRoomPropretiesDlg dlg(true);
+	dlg.DoModal();
+	RefreshList();
+}
+
+// 修改房间类型
+void CHotelSystemMainDlg::ChangeRoomType()
+{
+	// 首先获取房间ID
+	if (m_nCilckListLine == -1)
+		return;
+	CString cstrSelectRoomID = m_listSplash.GetItemText(m_nCilckListLine, 0);
+	if (cstrSelectRoomID == _T(""))
+		return;
+	int nRoomID{ _ttoi(cstrSelectRoomID) };
+	// 在vector中查找这个房间
+	int nRankRoomID{};
+	for (int i = 0; i < m_vecSplashRoom.size(); i++)
+		if (m_vecSplashRoom[i].m_nRoomID == nRoomID)
+		{
+			nRankRoomID = i;
+			break;
+		}
+	// 如果当前房间有客人的话是不能变更的
+	if(m_vecSplashRoom[nRankRoomID].m_nGuestID != 0)
+	{
+		MessageBox(_T("当前房间有宾客,不能修改房间类型"), 0, MB_ICONERROR | MB_OK);
+		return;
+	}
+	// 变更信息
+	CHotelSystemRoomPropretiesDlg dlg(false, nRoomID);
+	dlg.DoModal();
+	RefreshList();
+}
+
+// 删除房间
+void CHotelSystemMainDlg::DeleteRoom()
+{
+	if (IDNO == MessageBox(_T("确认删除房间的操作吗"), 0, MB_ICONINFORMATION | MB_YESNO))
+		return;
+	// 首先获取房间ID
+	if (m_nCilckListLine == -1)
+		return;
+	CString cstrSelectRoomID = m_listSplash.GetItemText(m_nCilckListLine, 0);
+	if (cstrSelectRoomID == _T(""))
+		return;
+	int nRoomID{ _ttoi(cstrSelectRoomID) };
+	// 在vector中查找这个房间
+	int nRankRoomID{};
+	for (int i = 0; i < m_vecSplashRoom.size(); i++)
+		if (m_vecSplashRoom[i].m_nRoomID == nRoomID)
+		{
+			nRankRoomID = i;
+			break;
+		}
+	// 如果当前房间有客人的话是不能变更的
+	if (m_vecSplashRoom[nRankRoomID].m_nGuestID != 0)
+	{
+		MessageBox(_T("当前房间有宾客,不能修改房间类型"), 0, MB_ICONERROR | MB_OK);
+		return;
+	}
+	CString sql;
+	sql.Format(_T("DELETE FROM room WHERE id=%d"), nRoomID);
+	try
+	{
+		if (g_mysql.excuteUpdate(sql) <= 0)
+		{
+			MessageBox(_T("数据库删除失败"), 0, MB_ICONERROR | MB_OK);
+			g_log.insertNewError(aduit::e_error, sql, GetLastError());
+		}
+	}
+	catch (const sql::SQLException &e)
+	{
+		MessageBox(_T("数据库删除失败"), 0, MB_ICONERROR | MB_OK);
+		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
+		return;
+	}
+	MessageBox(_T("删除房间成功"), 0, MB_ICONINFORMATION | MB_OK);
+	data::GetAllItem();
+	RefreshList();
 }

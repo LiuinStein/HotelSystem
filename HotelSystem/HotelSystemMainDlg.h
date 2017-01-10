@@ -40,6 +40,9 @@ public:
 	afx_msg void OnRclickListSplash(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void SetRoomClear();
 	afx_msg void SetRoomDirty();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void AddNewRoom();
+	afx_msg void ChangeRoomType();
 
 	void SetRoomDirtyCondition(bool __isdirty);
 
@@ -58,4 +61,5 @@ public:
 	stl::CVector<SSplashShow> m_vecSplashRoom;
 	int m_nCilckListLine;
 
+	afx_msg void DeleteRoom();
 };

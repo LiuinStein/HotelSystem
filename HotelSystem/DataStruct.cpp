@@ -11,6 +11,8 @@ stl::CVector<data::SRoom> g_vecAvailableRoom;
 stl::CVector<data::SItem> g_vecAllItem;
 // typeid对房间类型名映射
 std::map<int, data::VARCHAR> g_mapRoomType;
+// 房间类型名对typeid映射
+std::map<data::VARCHAR, int> g_mapRoomID;
 
 bool data::GetGetRoomTypeByCondition(stl::CVector<SRoomType>& __store, const char* __con)
 {
@@ -121,7 +123,10 @@ bool data::GetRoomTypeMap()
 	{
 		g_mysql.excuteQuery(sql);
 		while (g_mysql.resultNext())
+		{
 			g_mapRoomType[g_mysql.getResultSet()->getInt("id")] = g_mysql.getResultSet()->getString("name");
+			g_mapRoomID[g_mysql.getResultSet()->getString("name")] = g_mysql.getResultSet()->getInt("id");
+		}
 	}
 	catch (const sql::SQLException& e)
 	{

@@ -19,5 +19,7 @@ extern stl::CVector<data::SRoom> g_vecAvailableRoom;
 extern stl::CVector<data::SItem> g_vecAllItem;
 // typeid对房间类型名映射关系
 extern std::map<int, data::VARCHAR> g_mapRoomType;
+// 房间类型名对typeid映射
+extern std::map<data::VARCHAR, int> g_mapRoomID;
 
 #endif // !__GLOBAL_VARIABLE_H_
