@@ -33,6 +33,9 @@ public:
 // Implementation
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnBnClickedOk();
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -45,6 +48,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+	ON_BN_CLICKED(IDOK, &CAboutDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -225,4 +229,18 @@ void CHotelSystemDlg::OnBnClickedButtonLogin()
 		g_log.insertNewError(aduit::e_error, e.what(), GetLastError());
 	}
 
+}
+
+
+BOOL CAboutDlg::PreTranslateMessage(MSG* pMsg)
+{
+	if (pMsg->message == WM_KEYDOWN &&  pMsg->wParam == VK_ESCAPE)
+		return TRUE;
+	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+void CAboutDlg::OnBnClickedOk()
+{
+	CDialogEx::OnOK();
 }

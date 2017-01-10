@@ -51,4 +51,5 @@ public:
 	CListCtrl m_listSplash;
 	stl::CVector<SSplashShow> m_vecSplashRoom;
 
+	afx_msg void OnBnClickedButtonAbout();
 };

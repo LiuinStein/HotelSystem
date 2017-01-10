@@ -198,6 +198,7 @@
     <ClInclude Include="DataStruct.h" />
     <ClInclude Include="GlobalVariable.h" />
     <ClInclude Include="HotelSystem.h" />
+    <ClInclude Include="HotelSystemAboutDlg.h" />
     <ClInclude Include="HotelSystemCheckinDlg.h" />
     <ClInclude Include="HotelSystemCheckoutDlg.h" />
     <ClInclude Include="HotelSystemDlg.h" />
@@ -214,6 +215,7 @@
   <ItemGroup>
     <ClCompile Include="DataStruct.cpp" />
     <ClCompile Include="HotelSystem.cpp" />
+    <ClCompile Include="HotelSystemAboutDlg.cpp" />
     <ClCompile Include="HotelSystemCheckinDlg.cpp" />
     <ClCompile Include="HotelSystemCheckoutDlg.cpp" />
     <ClCompile Include="HotelSystemDlg.cpp" />
