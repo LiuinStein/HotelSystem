@@ -7,6 +7,7 @@
 #include "HotelSystemCheckinDlg.h"
 #include "HotelSystemCheckoutDlg.h"
 #include "HotelSystemSearchGuestDlg.h"
+#include "HotelSystemExpense.h"
 #include "afxdialogex.h"
 #include "GlobalVariable.h"
 
@@ -48,6 +49,7 @@ BEGIN_MESSAGE_MAP(CHotelSystemMainDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_CHECKIN, &CHotelSystemMainDlg::OnBnClickedButtonCheckin)
 	ON_BN_CLICKED(IDC_BUTTON_CHECKOUT, &CHotelSystemMainDlg::OnBnClickedButtonCheckout)
 	ON_BN_CLICKED(IDC_BUTTON_SEARCHGUEST, &CHotelSystemMainDlg::OnBnClickedButtonSearchguest)
+	ON_BN_CLICKED(IDC_BUTTON_EXPENSE, &CHotelSystemMainDlg::OnBnClickedButtonExpense)
 END_MESSAGE_MAP()
 
 
@@ -108,5 +110,12 @@ void CHotelSystemMainDlg::OnBnClickedButtonCheckout()
 void CHotelSystemMainDlg::OnBnClickedButtonSearchguest()
 {
 	CHotelSystemSearchGuestDlg dlg;
+	dlg.DoModal();
+}
+
+// 续费及退款按钮事件响应
+void CHotelSystemMainDlg::OnBnClickedButtonExpense()
+{
+	CHotelSystemExpense dlg;
 	dlg.DoModal();
 }

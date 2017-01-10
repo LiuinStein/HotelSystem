@@ -201,6 +201,7 @@
     <ClInclude Include="HotelSystemCheckinDlg.h" />
     <ClInclude Include="HotelSystemCheckoutDlg.h" />
     <ClInclude Include="HotelSystemDlg.h" />
+    <ClInclude Include="HotelSystemExpense.h" />
     <ClInclude Include="HotelSystemMainDlg.h" />
     <ClInclude Include="HotelSystemSearchGuestDlg.h" />
     <ClInclude Include="Log.h" />
@@ -216,6 +217,7 @@
     <ClCompile Include="HotelSystemCheckinDlg.cpp" />
     <ClCompile Include="HotelSystemCheckoutDlg.cpp" />
     <ClCompile Include="HotelSystemDlg.cpp" />
+    <ClCompile Include="HotelSystemExpense.cpp" />
     <ClCompile Include="HotelSystemMainDlg.cpp" />
     <ClCompile Include="HotelSystemSearchGuestDlg.cpp" />
     <ClCompile Include="Log.cpp" />
