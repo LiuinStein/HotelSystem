@@ -43,8 +43,10 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void AddNewRoom();
 	afx_msg void ChangeRoomType();
+	afx_msg void DeleteRoom();
 
 	void SetRoomDirtyCondition(bool __isdirty);
+	int GetRoomIDFromList();
 
 	struct SSplashShow
 	{
@@ -61,5 +63,4 @@ public:
 	stl::CVector<SSplashShow> m_vecSplashRoom;
 	int m_nCilckListLine;
 
-	afx_msg void DeleteRoom();
 };

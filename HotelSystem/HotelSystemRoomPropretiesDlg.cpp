@@ -124,14 +124,16 @@ void CHotelSystemRoomPropretiesDlg::OnBnClickedButtonSave()
 				MessageBox(_T("数据库添加失败"), 0, MB_ICONERROR | MB_OK);
 				g_log.insertNewError(aduit::e_error, sql, GetLastError());
 			}
-			return;
 		}
-		// 更改房间类型的话
-		sql.Format(_T("UPDATE room SET typeid=%d WHERE id=%d"), nTypeID, m_nRoomID);
-		if (g_mysql.excuteUpdate(sql) <= 0)
+		else
 		{
-			MessageBox(_T("数据库添加失败"), 0, MB_ICONERROR | MB_OK);
-			g_log.insertNewError(aduit::e_error, sql, GetLastError());
+			// 更改房间类型的话
+			sql.Format(_T("UPDATE room SET typeid=%d WHERE id=%d"), nTypeID, m_nRoomID);
+			if (g_mysql.excuteUpdate(sql) <= 0)
+			{
+				MessageBox(_T("数据库添加失败"), 0, MB_ICONERROR | MB_OK);
+				g_log.insertNewError(aduit::e_error, sql, GetLastError());
+			}
 		}
 	}
 	catch (const sql::SQLException &e)

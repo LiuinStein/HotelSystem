@@ -279,6 +279,33 @@ void CHotelSystemMainDlg::SetRoomDirtyCondition(bool __isdirty)
 	m_nCilckListLine = -1;
 }
 
+// 从list中获取roomid
+int CHotelSystemMainDlg::GetRoomIDFromList()
+{
+	// 首先获取房间ID
+	if (m_nCilckListLine == -1)
+		return -1;
+	CString cstrSelectRoomID = m_listSplash.GetItemText(m_nCilckListLine, 0);
+	if (cstrSelectRoomID == _T(""))
+		return -1;
+	int nRoomID{ _ttoi(cstrSelectRoomID) };
+	// 在vector中查找这个房间
+	int nRankRoomID{};
+	for (int i = 0; i < m_vecSplashRoom.size(); i++)
+		if (m_vecSplashRoom[i].m_nRoomID == nRoomID)
+		{
+			nRankRoomID = i;
+			break;
+		}
+	// 如果当前房间有客人的话是不能变更的
+	if (m_vecSplashRoom[nRankRoomID].m_nGuestID != 0)
+	{
+		MessageBox(_T("当前房间有宾客,不能修改房间类型"), 0, MB_ICONERROR | MB_OK);
+		return -1;
+	}
+	return nRoomID;
+}
+
 // 计时器每隔5分钟更新一次列表
 void CHotelSystemMainDlg::OnTimer(UINT_PTR nIDEvent)
 {
@@ -297,27 +324,9 @@ void CHotelSystemMainDlg::AddNewRoom()
 // 修改房间类型
 void CHotelSystemMainDlg::ChangeRoomType()
 {
-	// 首先获取房间ID
-	if (m_nCilckListLine == -1)
+	int nRoomID{ GetRoomIDFromList() };
+	if (-1 == nRoomID)
 		return;
-	CString cstrSelectRoomID = m_listSplash.GetItemText(m_nCilckListLine, 0);
-	if (cstrSelectRoomID == _T(""))
-		return;
-	int nRoomID{ _ttoi(cstrSelectRoomID) };
-	// 在vector中查找这个房间
-	int nRankRoomID{};
-	for (int i = 0; i < m_vecSplashRoom.size(); i++)
-		if (m_vecSplashRoom[i].m_nRoomID == nRoomID)
-		{
-			nRankRoomID = i;
-			break;
-		}
-	// 如果当前房间有客人的话是不能变更的
-	if(m_vecSplashRoom[nRankRoomID].m_nGuestID != 0)
-	{
-		MessageBox(_T("当前房间有宾客,不能修改房间类型"), 0, MB_ICONERROR | MB_OK);
-		return;
-	}
 	// 变更信息
 	CHotelSystemRoomPropretiesDlg dlg(false, nRoomID);
 	dlg.DoModal();
@@ -329,27 +338,9 @@ void CHotelSystemMainDlg::DeleteRoom()
 {
 	if (IDNO == MessageBox(_T("确认删除房间的操作吗"), 0, MB_ICONINFORMATION | MB_YESNO))
 		return;
-	// 首先获取房间ID
-	if (m_nCilckListLine == -1)
+	int nRoomID{ GetRoomIDFromList() };
+	if (-1 == nRoomID)
 		return;
-	CString cstrSelectRoomID = m_listSplash.GetItemText(m_nCilckListLine, 0);
-	if (cstrSelectRoomID == _T(""))
-		return;
-	int nRoomID{ _ttoi(cstrSelectRoomID) };
-	// 在vector中查找这个房间
-	int nRankRoomID{};
-	for (int i = 0; i < m_vecSplashRoom.size(); i++)
-		if (m_vecSplashRoom[i].m_nRoomID == nRoomID)
-		{
-			nRankRoomID = i;
-			break;
-		}
-	// 如果当前房间有客人的话是不能变更的
-	if (m_vecSplashRoom[nRankRoomID].m_nGuestID != 0)
-	{
-		MessageBox(_T("当前房间有宾客,不能修改房间类型"), 0, MB_ICONERROR | MB_OK);
-		return;
-	}
 	CString sql;
 	sql.Format(_T("DELETE FROM room WHERE id=%d"), nRoomID);
 	try
