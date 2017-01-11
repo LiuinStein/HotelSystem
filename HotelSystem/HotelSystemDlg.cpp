@@ -109,7 +109,14 @@ BOOL CHotelSystemDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	// TODO: Add extra initialization here
+	// 创建互斥体防止程序多开
+	HANDLE hObject = ::CreateMutex(NULL, FALSE, _T("MutexHotelSystem"));
+	if (GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		CloseHandle(hObject);
+		MessageBox(_T("酒店管理系统已经在后台运行"), 0, MB_OK | MB_ICONERROR);
+		exit(0);
+	}
 	// 初始化数据库连接
 	if(!g_mysql.initIsSuccess())
 	{
