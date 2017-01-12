@@ -196,8 +196,18 @@ void CHotelSystemDlg::OnBnClickedButtonLogin()
 {
 	CString inp_username;
 	m_editUsername.GetWindowTextW(inp_username);
+	if(inp_username == _T(""))
+	{
+		m_editUsername.ShowBalloonTip(_T("提示"), _T("请填写用户名"), TTI_INFO);
+		return;
+	}
 	CString inp_pwd;
 	m_editPassword.GetWindowTextW(inp_pwd);
+	if (inp_pwd == _T(""))
+	{
+		m_editPassword.ShowBalloonTip(_T("提示"), _T("请填写密码"), TTI_INFO);
+		return;
+	}
 	if(db::SQLIsBad(inp_username) || db::SQLIsBad(inp_pwd))
 	{
 		CString info;
